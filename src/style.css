@@ -1,0 +1,1860 @@
+/* =========================================================
+   CGI STUDIO
+   Global Stylesheet
+========================================================= */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
+
+
+/* =========================================================
+   ROOT
+========================================================= */
+
+:root {
+  --bg: #070912;
+  --bg-soft: #0a1020;
+  --card: #10172a;
+  --card-2: #0c1221;
+
+  --text: #eef6ff;
+  --muted: #8b9ab3;
+  --muted-light: #b9c6d8;
+
+  --cyan: #22d3ee;
+  --cyan-soft: #22d3ee55;
+
+  --purple: #a855f7;
+  --purple-soft: #a855f755;
+
+  --green: #34d399;
+  --red: #fb7185;
+  --orange: #fb923c;
+
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  --max-width: 1400px;
+
+  --header-height: 68px;
+
+  --radius-small: 8px;
+  --radius-medium: 12px;
+  --radius-large: 17px;
+
+  --shadow:
+    0 18px 55px rgba(0, 0, 0, 0.20);
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+
+  background:
+    radial-gradient(
+      circle at 80% 10%,
+      rgba(53, 17, 90, 0.27),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 10% 35%,
+      rgba(8, 127, 155, 0.13),
+      transparent 35%
+    ),
+    var(--bg);
+
+  color: var(--text);
+
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  line-height: 1.6;
+
+  overflow-x: hidden;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button,
+input {
+  outline: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background: rgba(34, 211, 238, 0.30);
+  color: #fff;
+}
+
+
+/* =========================================================
+   TYPOGRAPHY
+========================================================= */
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: "Space Grotesk", sans-serif;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h2 {
+  margin-bottom: 10px;
+
+  font-size:
+    clamp(35px, 5vw, 60px);
+
+  line-height: 1;
+}
+
+h3 {
+  margin-bottom: 7px;
+}
+
+p {
+  color: var(--muted);
+}
+
+
+/* =========================================================
+   APP
+========================================================= */
+
+#app {
+  min-height: 100vh;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  display: flex;
+  align-items: center;
+  gap: 18px;
+
+  min-height: var(--header-height);
+
+  padding:
+    10px
+    4vw;
+
+  background: rgba(7, 9, 18, 0.86);
+
+  border-bottom:
+    1px solid var(--border);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+
+/* =========================================================
+   BRAND
+========================================================= */
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  min-width: max-content;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+
+  width: 42px;
+  height: 42px;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--cyan),
+      var(--purple)
+    );
+
+  color: #06111c;
+
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+
+  box-shadow:
+    0 0 25px rgba(34, 211, 238, 0.16);
+}
+
+.brand-text strong {
+  display: block;
+
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 14px;
+}
+
+.brand-text small {
+  display: block;
+
+  color: var(--muted);
+
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 1;
+
+  gap: 2px;
+
+  flex-wrap: wrap;
+}
+
+.main-nav a {
+  padding:
+    7px
+    9px;
+
+  border-radius: 9px;
+
+  color: #9aa9bf;
+
+  font-size: 12px;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.main-nav a:hover,
+.main-nav a.active {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+
+/* =========================================================
+   MOBILE MENU
+========================================================= */
+
+.menu-toggle {
+  display: none;
+
+  margin-left: auto;
+
+  padding: 5px;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #fff;
+
+  font-size: 24px;
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.btn,
+.studio-toolbar button,
+.edit-actions button,
+.filter,
+.panel-title button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 38px;
+
+  padding:
+    9px
+    14px;
+
+  border:
+    1px solid var(--border-strong);
+
+  border-radius: 9px;
+
+  background:
+    rgba(255, 255, 255, 0.04);
+
+  color: #dbeafe;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.btn:hover,
+.studio-toolbar button:hover,
+.edit-actions button:hover,
+.filter:hover,
+.panel-title button:hover {
+  background:
+    rgba(255, 255, 255, 0.08);
+
+  border-color:
+    rgba(34, 211, 238, 0.38);
+
+  transform: translateY(-1px);
+}
+
+.btn:active,
+.studio-toolbar button:active,
+.edit-actions button:active {
+  transform: translateY(0);
+}
+
+.btn.primary {
+  border-color: transparent;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--cyan),
+      var(--purple)
+    );
+
+  color: #06111c;
+
+  font-weight: 800;
+
+  box-shadow:
+    0 10px 35px rgba(34, 211, 238, 0.15);
+}
+
+.btn.primary:hover {
+  background:
+    linear-gradient(
+      135deg,
+      #67e8f9,
+      #c084fc
+    );
+
+  box-shadow:
+    0 14px 45px rgba(34, 211, 238, 0.22);
+}
+
+.btn.danger,
+.danger {
+  color: #fecdd3;
+
+  border-color:
+    rgba(251, 113, 133, 0.25);
+}
+
+.btn.danger:hover,
+.danger:hover {
+  background:
+    rgba(251, 113, 133, 0.10);
+
+  border-color:
+    rgba(251, 113, 133, 0.55);
+}
+
+
+/* =========================================================
+   PAGES
+========================================================= */
+
+.page {
+  display: none;
+
+  max-width: var(--max-width);
+
+  margin: 0 auto;
+
+  padding:
+    75px
+    4vw;
+}
+
+.page.active {
+  display: block;
+}
+
+
+/* =========================================================
+   SECTION HEADER
+========================================================= */
+
+.section-header {
+  margin-bottom: 30px;
+}
+
+.eyebrow {
+  display: inline-block;
+
+  margin-bottom: 4px;
+
+  color: var(--cyan);
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.18em;
+}
+
+.section-header p {
+  max-width: 760px;
+
+  font-size: 16px;
+}
+
+
+/* =========================================================
+   HOME / HERO
+========================================================= */
+
+.hero {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+
+  align-items: center;
+
+  gap: 40px;
+
+  min-height:
+    calc(100vh - var(--header-height));
+}
+
+.hero h1 {
+  margin:
+    18px
+    0;
+
+  font-size:
+    clamp(48px, 7vw, 92px);
+
+  line-height: 0.94;
+}
+
+.hero h1 em {
+  font-style: normal;
+
+  color: transparent;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--cyan),
+      #ffffff,
+      var(--purple)
+    );
+
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.hero p {
+  max-width: 700px;
+
+  font-size: 18px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 10px;
+
+  margin:
+    25px
+    0;
+}
+
+.stats {
+  display: flex;
+
+  gap: 30px;
+}
+
+.stats strong {
+  display: block;
+
+  font-family: "Space Grotesk", sans-serif;
+
+  font-size: 23px;
+}
+
+.stats small {
+  display: block;
+
+  color: var(--muted);
+
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   HERO CGI ORB
+========================================================= */
+
+.hero-visual {
+  min-width: 0;
+}
+
+.orb {
+  position: relative;
+
+  display: grid;
+  place-items: center;
+
+  height: 520px;
+}
+
+.orb-core {
+  position: absolute;
+
+  width: 220px;
+  height: 220px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      #e6fbff,
+      rgba(34, 211, 238, 0.40) 25%,
+      rgba(168, 85, 247, 0.27) 60%,
+      transparent 70%
+    );
+
+  box-shadow:
+    0 0 90px rgba(34, 211, 238, 0.27),
+    0 0 140px rgba(168, 85, 247, 0.20);
+}
+
+.orb-ring {
+  position: absolute;
+
+  border:
+    1px solid rgba(34, 211, 238, 0.33);
+
+  border-radius: 50%;
+}
+
+.ring-one {
+  width: 440px;
+  height: 190px;
+
+  transform: rotate(25deg);
+
+  animation:
+    orbitOne 10s linear infinite;
+}
+
+.ring-two {
+  width: 500px;
+  height: 230px;
+
+  border-color:
+    rgba(168, 85, 247, 0.34);
+
+  transform: rotate(-45deg);
+
+  animation:
+    orbitTwo 14s linear infinite;
+}
+
+@keyframes orbitOne {
+  from {
+    transform: rotate(25deg);
+  }
+
+  to {
+    transform: rotate(385deg);
+  }
+}
+
+@keyframes orbitTwo {
+  from {
+    transform: rotate(-45deg);
+  }
+
+  to {
+    transform: rotate(315deg);
+  }
+}
+
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.grid {
+  display: grid;
+
+  gap: 15px;
+}
+
+.grid.two {
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+}
+
+.grid.three {
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+}
+
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.card,
+.note,
+.tutorial,
+.future,
+.project,
+.gallery-card {
+  padding: 20px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: var(--radius-large);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.012)
+    );
+
+  box-shadow: var(--shadow);
+
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.card:hover,
+.note:hover,
+.tutorial:hover,
+.future:hover,
+.project:hover,
+.gallery-card:hover {
+  transform: translateY(-3px);
+
+  border-color:
+    rgba(34, 211, 238, 0.22);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.065),
+      rgba(255, 255, 255, 0.018)
+    );
+}
+
+.card-number {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: var(--cyan);
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.15em;
+}
+
+
+/* =========================================================
+   ABOUT
+========================================================= */
+
+.about-layout {
+  display: grid;
+
+  grid-template-columns:
+    minmax(260px, 0.75fr)
+    minmax(0, 1.5fr);
+
+  gap: 15px;
+}
+
+.profile-card {
+  align-self: start;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+
+  width: 90px;
+  height: 90px;
+
+  margin-bottom: 18px;
+
+  border-radius: 22px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--cyan),
+      var(--purple)
+    );
+
+  color: #06111c;
+
+  font-size: 22px;
+  font-weight: 900;
+}
+
+
+/* =========================================================
+   TAGS
+========================================================= */
+
+.tags {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 7px;
+}
+
+.tags span {
+  padding:
+    5px
+    8px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 999px;
+
+  color: #c8f5ff;
+
+  font-size: 10px;
+}
+
+
+/* =========================================================
+   LEARNING WORKFLOW
+========================================================= */
+
+.workflow {
+  display: grid;
+
+  grid-template-columns:
+    repeat(8, minmax(0, 1fr));
+
+  gap: 8px;
+
+  margin-top: 35px;
+}
+
+.workflow div {
+  padding:
+    14px
+    5px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 12px;
+
+  background:
+    rgba(255, 255, 255, 0.02);
+
+  text-align: center;
+
+  font-size: 11px;
+}
+
+.workflow b {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: var(--cyan);
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.search {
+  width: 100%;
+
+  padding:
+    13px
+    15px;
+
+  margin-bottom: 18px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 11px;
+
+  background:
+    #080d19;
+
+  color: #fff;
+}
+
+.search::placeholder {
+  color: #64748b;
+}
+
+.search:focus {
+  border-color:
+    rgba(34, 211, 238, 0.45);
+
+  box-shadow:
+    0 0 0 3px rgba(34, 211, 238, 0.07);
+}
+
+
+/* =========================================================
+   HISTORY TIMELINE
+========================================================= */
+
+.timeline {
+  margin-left: 10px;
+
+  border-left:
+    1px solid rgba(34, 211, 238, 0.40);
+}
+
+.timeline article {
+  position: relative;
+
+  padding:
+    0
+    0
+    30px
+    28px;
+}
+
+.timeline article::before {
+  content: "";
+
+  position: absolute;
+
+  left: -6px;
+  top: 7px;
+
+  width: 11px;
+  height: 11px;
+
+  border-radius: 50%;
+
+  background:
+    var(--cyan);
+
+  box-shadow:
+    0 0 18px var(--cyan);
+}
+
+.timeline .year {
+  color: var(--cyan);
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   STUDIO
+========================================================= */
+
+.studio-layout {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    330px;
+
+  gap: 13px;
+}
+
+
+/* =========================================================
+   VIEWPORT
+========================================================= */
+
+.viewport-panel,
+.editor-panel {
+  overflow: hidden;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: var(--radius-large);
+
+  background:
+    #080e1b;
+}
+
+.studio-toolbar {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  padding: 9px;
+
+  border-bottom:
+    1px solid var(--border);
+
+  flex-wrap: wrap;
+}
+
+.toolbar-spacer {
+  flex: 1;
+}
+
+.studio-toolbar button {
+  min-height: 34px;
+
+  padding:
+    7px
+    10px;
+
+  font-size: 11px;
+}
+
+.scene-container {
+  width: 100%;
+  height: 610px;
+
+  overflow: hidden;
+
+  background:
+    #070912;
+}
+
+.scene-container canvas {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+}
+
+.status {
+  display: block;
+
+  padding:
+    8px
+    11px;
+
+  border-top:
+    1px solid var(--border);
+
+  color: var(--green);
+
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   EDITOR
+========================================================= */
+
+.editor-panel {
+  padding: 13px;
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 9px;
+
+  color: #7e8ca5;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.15em;
+}
+
+.panel-title button {
+  min-width: 30px;
+  min-height: 30px;
+
+  padding: 4px;
+}
+
+
+/* =========================================================
+   OBJECT LIST
+========================================================= */
+
+.object-list {
+  margin-bottom: 20px;
+}
+
+.object-item {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+
+  gap: 9px;
+
+  margin-bottom: 5px;
+
+  padding:
+    9px;
+
+  border:
+    1px solid transparent;
+
+  border-radius: 8px;
+
+  background:
+    rgba(255, 255, 255, 0.025);
+
+  color: var(--muted-light);
+
+  text-align: left;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.object-item:hover {
+  background:
+    rgba(255, 255, 255, 0.055);
+}
+
+.object-item.selected {
+  border-color:
+    rgba(34, 211, 238, 0.40);
+
+  background:
+    rgba(14, 32, 48, 0.95);
+
+  color: #fff;
+}
+
+.object-index {
+  color: var(--cyan);
+
+  font-size: 10px;
+}
+
+
+/* =========================================================
+   PROPERTIES
+========================================================= */
+
+.properties {
+  max-height: 400px;
+
+  overflow-y: auto;
+
+  padding-right: 2px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.property {
+  display: block;
+
+  margin:
+    9px
+    0;
+
+  color: #718096;
+
+  font-size: 9px;
+}
+
+.property input {
+  display: block;
+
+  width: 100%;
+
+  margin-top: 3px;
+
+  padding:
+    6px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 7px;
+
+  background:
+    #060b15;
+
+  color: #fff;
+}
+
+.property input:focus,
+.prop-grid input:focus {
+  border-color:
+    rgba(34, 211, 238, 0.40);
+}
+
+.prop-group {
+  margin:
+    12px
+    0;
+}
+
+.prop-group strong {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #94a3b8;
+
+  font-size: 11px;
+}
+
+.prop-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 5px;
+}
+
+.prop-grid label {
+  color: #718096;
+
+  font-size: 9px;
+}
+
+.prop-grid input {
+  width: 100%;
+
+  margin-top: 3px;
+
+  padding: 6px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 7px;
+
+  background:
+    #060b15;
+
+  color: #fff;
+}
+
+
+/* =========================================================
+   EDIT ACTIONS
+========================================================= */
+
+.edit-actions {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 6px;
+
+  margin-top: 14px;
+}
+
+.edit-actions button {
+  font-size: 11px;
+}
+
+.edit-actions button:last-child {
+  grid-column: 1 / -1;
+}
+
+
+/* =========================================================
+   PROJECTS
+========================================================= */
+
+.project-tools {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin-bottom: 20px;
+
+  flex-wrap: wrap;
+}
+
+.project-name-input {
+  max-width: 350px;
+
+  margin: 0;
+}
+
+
+/* =========================================================
+   GALLERY
+========================================================= */
+
+.filters {
+  display: flex;
+
+  gap: 7px;
+
+  margin-bottom: 16px;
+
+  flex-wrap: wrap;
+}
+
+.filter {
+  min-height: 34px;
+
+  padding:
+    7px
+    12px;
+
+  font-size: 11px;
+}
+
+.filter.active {
+  border-color:
+    rgba(34, 211, 238, 0.55);
+
+  background:
+    rgba(34, 211, 238, 0.08);
+
+  color: #fff;
+}
+
+.gallery-card img {
+  width: 100%;
+  height: 190px;
+
+  object-fit: cover;
+
+  margin-bottom: 10px;
+
+  border-radius: 10px;
+}
+
+.gallery-placeholder {
+  display: grid;
+  place-items: center;
+
+  height: 190px;
+
+  margin-bottom: 10px;
+
+  border-radius: 10px;
+
+  background:
+    radial-gradient(
+      circle,
+      #1b2b4d,
+      #080d18
+    );
+
+  color: #dbeafe;
+
+  font-size: 60px;
+  font-weight: 900;
+}
+
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+.settings {
+  display: grid;
+
+  gap: 10px;
+
+  max-width: 700px;
+}
+
+.setting-row {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 16px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 12px;
+
+  background:
+    var(--card);
+}
+
+.setting-row strong {
+  display: block;
+
+  margin-bottom: 3px;
+}
+
+.setting-row small {
+  display: block;
+
+  color: var(--muted);
+
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   CHECKBOXES
+========================================================= */
+
+.setting-row input {
+  width: 20px;
+  height: 20px;
+
+  accent-color: var(--cyan);
+}
+
+
+/* =========================================================
+   ROADMAP
+========================================================= */
+
+.roadmap {
+  display: grid;
+
+  gap: 9px;
+}
+
+.roadmap article {
+  display: flex;
+
+  align-items: center;
+
+  gap: 16px;
+
+  padding: 18px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 14px;
+
+  background:
+    var(--card);
+}
+
+.roadmap article > b {
+  display: grid;
+  place-items: center;
+
+  flex: 0 0 auto;
+
+  width: 40px;
+  height: 40px;
+
+  border:
+    1px solid rgba(168, 85, 247, 0.60);
+
+  border-radius: 50%;
+
+  color: #e9d5ff;
+}
+
+.roadmap article p {
+  margin: 3px 0 0;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  max-width: var(--max-width);
+
+  margin: 0 auto;
+
+  padding:
+    35px
+    4vw
+    55px;
+
+  border-top:
+    1px solid var(--border);
+
+  color: var(--muted);
+
+  font-size: 12px;
+}
+
+footer strong {
+  color: #fff;
+
+  font-family: "Space Grotesk", sans-serif;
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.toast {
+  position: fixed;
+
+  right: 20px;
+  bottom: 20px;
+
+  z-index: 100;
+
+  max-width: min(
+    90vw,
+    400px
+  );
+
+  padding:
+    12px
+    16px;
+
+  border:
+    1px solid rgba(34, 211, 238, 0.40);
+
+  border-radius: 10px;
+
+  background:
+    rgba(18, 32, 57, 0.96);
+
+  color: #fff;
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.35);
+
+  opacity: 0;
+
+  transform:
+    translateY(20px);
+
+  pointer-events: none;
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.toast.show {
+  opacity: 1;
+
+  transform:
+    translateY(0);
+}
+
+
+/* =========================================================
+   SCROLLBARS
+========================================================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #070b14;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #26334d;
+
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #344665;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1100px) {
+
+  .site-header {
+    position: sticky;
+  }
+
+  .main-nav {
+    display: none;
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    top: var(--header-height);
+
+    padding: 12px;
+
+    background:
+      rgba(8, 12, 24, 0.98);
+
+    border-bottom:
+      1px solid var(--border);
+
+    box-shadow:
+      0 20px 50px rgba(0, 0, 0, 0.30);
+  }
+
+  .main-nav.open {
+    display: grid;
+
+    grid-template-columns:
+      repeat(3, 1fr);
+
+    gap: 4px;
+  }
+
+  .main-nav a {
+    text-align: center;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+
+  .install-button {
+    order: 3;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-visual {
+    order: -1;
+  }
+
+  .orb {
+    height: 330px;
+  }
+
+  .about-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .studio-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .grid.three {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+  :root {
+    --header-height: 62px;
+  }
+
+  .site-header {
+    padding:
+      9px
+      14px;
+  }
+
+  .brand-text small {
+    display: none;
+  }
+
+  .brand-mark {
+    width: 38px;
+    height: 38px;
+  }
+
+  .main-nav.open {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+  .install-button {
+    display: none;
+  }
+
+  .page {
+    padding:
+      52px
+      16px;
+  }
+
+  .hero {
+    min-height:
+      calc(100vh - 62px);
+
+    gap: 15px;
+  }
+
+  .hero-visual {
+    display: none;
+  }
+
+  .hero h1 {
+    font-size: 50px;
+  }
+
+  .hero p {
+    font-size: 16px;
+  }
+
+  .stats {
+    gap: 18px;
+  }
+
+  .stats strong {
+    font-size: 19px;
+  }
+
+  .grid.two,
+  .grid.three {
+    grid-template-columns: 1fr;
+  }
+
+  .workflow {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .scene-container {
+    height: 470px;
+  }
+
+  .studio-toolbar {
+    padding: 7px;
+  }
+
+  .studio-toolbar button {
+    flex: 1 1 auto;
+  }
+
+  .toolbar-spacer {
+    display: none;
+  }
+
+  .prop-grid {
+    grid-template-columns:
+      repeat(3, 1fr);
+  }
+
+  .project-tools {
+    align-items: stretch;
+  }
+
+  .project-name-input {
+    max-width: none;
+  }
+
+  .project-tools .btn {
+    flex: 1;
+  }
+
+  .setting-row {
+    align-items: flex-start;
+  }
+
+  footer {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    padding:
+      30px
+      16px
+      45px;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL PHONES
+========================================================= */
+
+@media (max-width: 430px) {
+
+  .hero h1 {
+    font-size: 43px;
+  }
+
+  h2 {
+    font-size: 38px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .actions .btn {
+    width: 100%;
+  }
+
+  .stats {
+    flex-wrap: wrap;
+  }
+
+  .main-nav.open {
+    grid-template-columns: 1fr;
+  }
+
+  .workflow {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-actions button:last-child {
+    grid-column: auto;
+  }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+
+    transition-duration: 0.001ms !important;
+  }
+
+}
+
+
+/* =========================================================
+   PRINT
+========================================================= */
+
+@media print {
+
+  .site-header,
+  .studio-toolbar,
+  .editor-panel,
+  .toast,
+  footer {
+    display: none !important;
+  }
+
+  .page {
+    display: block !important;
+
+    padding: 20px;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  p {
+    color: #333;
+  }
+
+}

@@ -1,0 +1,17 @@
+{
+  "name": "cgi-studio-pwa",
+  "private": true,
+  "version": "3.0.0",
+  "type": "module",
+  "description": "CGI Studio — interactive CGI learning, 3D creation, projects and portfolio.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.180.0",
+    "vite": "^7.3.6",
+    "vite-plugin-pwa": "^1.1.0"
+  }
+}
