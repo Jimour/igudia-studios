@@ -1,21 +1,34 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { registerSW } from "virtual:pwa-register";
-
 import "./style.css";
 
 /* =========================================================
-   PWA
+   CGI STUDIO - MAIN APPLICATION
+   Includes:
+   - 3D Studio
+   - Starter Cube
+   - Actual 3D Human Character
+   - Character animation
+   - Object selection
+   - Projects
+   - Gallery
+   - Notes
+   - Tutorials
+   - Settings
+   - PWA registration
 ========================================================= */
 
 try {
   registerSW({
     immediate: true,
+
     onRegistered(registration) {
       if (registration) {
         console.log("CGI Studio PWA registered.");
       }
     },
+
     onRegisterError(error) {
       console.warn("PWA registration error:", error);
     }
@@ -38,7 +51,7 @@ const STORAGE = {
 
 
 /* =========================================================
-   STATE
+   GLOBAL STATE
 ========================================================= */
 
 const S = {
@@ -46,10 +59,10 @@ const S = {
   camera: null,
   renderer: null,
   controls: null,
-
   grid: null,
 
   objects: [],
+
   selected: null,
 
   wire: false,
@@ -64,9 +77,7 @@ const S = {
     reduceMotion: false,
     showGrid: true,
     autoSave: true
-  },
-
-  lastTime: 0
+  }
 };
 
 
@@ -75,216 +86,238 @@ const S = {
 ========================================================= */
 
 const notes = [
-  {
-    title: "What is CGI?",
-    text: "Computer-generated imagery uses computers to create or manipulate visual content.",
-    tag: "Fundamentals"
-  },
-  {
-    title: "3D Coordinates",
-    text: "Three-dimensional scenes use X, Y and Z axes to describe position.",
-    tag: "3D"
-  },
-  {
-    title: "Polygon Modeling",
-    text: "Polygon modeling builds surfaces from vertices, edges and faces.",
-    tag: "Modeling"
-  },
-  {
-    title: "Materials",
-    text: "Materials describe how surfaces interact with light.",
-    tag: "Materials"
-  },
-  {
-    title: "Lighting",
-    text: "Lighting establishes mood, visibility, depth and visual hierarchy.",
-    tag: "Lighting"
-  },
-  {
-    title: "Animation",
-    text: "Animation creates motion by changing object properties over time.",
-    tag: "Animation"
-  },
-  {
-    title: "Rendering",
-    text: "Rendering converts a 3D scene into an image or sequence of images.",
-    tag: "Rendering"
-  },
-  {
-    title: "Compositing",
-    text: "Compositing combines visual elements into a final image.",
-    tag: "VFX"
-  }
-];
+  [
+    "What is CGI?",
+    "Computer-generated imagery uses computers to create or manipulate visual content.",
+    "Fundamentals"
+  ],
+  [
+    "3D Coordinates",
+    "Three-dimensional scenes use X, Y and Z axes to describe position.",
+    "3D"
+  ],
+  [
+    "Polygon Modeling",
+    "Polygon modeling builds surfaces from vertices, edges and faces.",
+    "Modeling"
+  ],
+  [
+    "Materials",
+    "Materials describe how surfaces interact with light.",
+    "Materials"
+  ],
+  [
+    "Lighting",
+    "Lighting establishes mood, visibility, depth and visual hierarchy.",
+    "Lighting"
+  ],
+  [
+    "Animation",
+    "Animation creates motion by changing object properties over time.",
+    "Animation"
+  ],
+  [
+    "Rendering",
+    "Rendering converts a 3D scene into an image or sequence of images.",
+    "Rendering"
+  ],
+  [
+    "Compositing",
+    "Compositing combines visual elements into a final image.",
+    "VFX"
+  ]
+].map(([title, text, tag]) => ({
+  title,
+  text,
+  tag
+}));
 
 
 const history = [
-  {
-    year: "1950s",
-    title: "Early Computer Graphics",
-    text: "Researchers began using computers to create mathematical and graphical imagery."
-  },
-  {
-    year: "1960s",
-    title: "Interactive Graphics",
-    text: "Interactive display systems helped establish computer graphics as a practical field."
-  },
-  {
-    year: "1970s",
-    title: "3D Foundations",
-    text: "Major advances in 3D geometry, rendering and computer animation emerged."
-  },
-  {
-    year: "1980s",
-    title: "CGI Enters Film",
-    text: "Computer-generated imagery began appearing more prominently in film and television."
-  },
-  {
-    year: "1990s",
-    title: "Digital Production",
-    text: "Digital effects, animation and 3D software became increasingly important in production."
-  },
-  {
-    year: "2000s",
-    title: "Realistic Rendering",
-    text: "Physically based rendering and increasingly powerful GPUs improved realism."
-  },
-  {
-    year: "2010s",
-    title: "Real-Time Graphics",
-    text: "Real-time engines became increasingly capable of producing cinematic imagery."
-  },
-  {
-    year: "2020s",
-    title: "AI + Real-Time Creation",
-    text: "AI-assisted creation, virtual production and real-time workflows continue to reshape CGI."
-  }
-];
+  [
+    "1950s",
+    "Early Computer Graphics",
+    "Researchers began using computers to create mathematical and graphical imagery."
+  ],
+  [
+    "1960s",
+    "Interactive Graphics",
+    "Interactive display systems helped establish computer graphics as a practical field."
+  ],
+  [
+    "1970s",
+    "3D Foundations",
+    "Major advances in 3D geometry, rendering and computer animation emerged."
+  ],
+  [
+    "1980s",
+    "CGI Enters Film",
+    "Computer-generated imagery began appearing more prominently in film and television."
+  ],
+  [
+    "1990s",
+    "Digital Production",
+    "Digital effects, animation and 3D software became increasingly important in production."
+  ],
+  [
+    "2000s",
+    "Realistic Rendering",
+    "Physically based rendering and increasingly powerful GPUs improved realism."
+  ],
+  [
+    "2010s",
+    "Real-Time Graphics",
+    "Real-time engines became increasingly capable of producing cinematic imagery."
+  ],
+  [
+    "2020s",
+    "AI + Real-Time Creation",
+    "AI-assisted creation, virtual production and real-time workflows continue to reshape CGI."
+  ]
+].map(([year, title, text]) => ({
+  year,
+  title,
+  text
+}));
 
 
 const tutorials = [
-  {
-    title: "Your First 3D Scene",
-    level: "Beginner",
-    duration: "20 min",
-    type: "Tutorial",
-    text: "Learn the basic relationship between objects, cameras and lights."
-  },
-  {
-    title: "Build a Human Character",
-    level: "Beginner",
-    duration: "30 min",
-    type: "Challenge",
-    text: "Create and inspect a simple low-poly human character."
-  },
-  {
-    title: "Lighting a Scene",
-    level: "Beginner",
-    duration: "25 min",
-    type: "Tutorial",
-    text: "Experiment with key, fill and environment lighting."
-  },
-  {
-    title: "Materials Challenge",
-    level: "Intermediate",
-    duration: "35 min",
-    type: "Challenge",
-    text: "Create contrasting surfaces using roughness and metallic properties."
-  },
-  {
-    title: "Animation Basics",
-    level: "Intermediate",
-    duration: "40 min",
-    type: "Tutorial",
-    text: "Understand keyframes, timing and looping motion."
-  },
-  {
-    title: "Create a Sci-Fi Environment",
-    level: "Intermediate",
-    duration: "60 min",
-    type: "Challenge",
-    text: "Design a futuristic environment using simple geometric forms."
-  }
-];
+  [
+    "Your First 3D Scene",
+    "Beginner",
+    "20 min",
+    "Tutorial",
+    "Learn the basic relationship between objects, cameras and lights."
+  ],
+  [
+    "Build a Human Character",
+    "Beginner",
+    "30 min",
+    "Challenge",
+    "Create and inspect a simple low-poly human character."
+  ],
+  [
+    "Lighting a Scene",
+    "Beginner",
+    "25 min",
+    "Tutorial",
+    "Experiment with key, fill and environment lighting."
+  ],
+  [
+    "Materials Challenge",
+    "Intermediate",
+    "35 min",
+    "Challenge",
+    "Create contrasting surfaces using roughness and metallic properties."
+  ],
+  [
+    "Animation Basics",
+    "Intermediate",
+    "40 min",
+    "Tutorial",
+    "Understand keyframes, timing and looping motion."
+  ],
+  [
+    "Create a Sci-Fi Environment",
+    "Intermediate",
+    "60 min",
+    "Challenge",
+    "Design a futuristic environment using simple geometric forms."
+  ]
+].map(([title, level, duration, type, text]) => ({
+  title,
+  level,
+  duration,
+  type,
+  text
+}));
 
 
 const future = [
-  {
-    title: "AI-Assisted CGI",
-    text: "AI tools can assist with ideation, asset generation, animation, compositing and workflow automation."
-  },
-  {
-    title: "Real-Time Rendering",
-    text: "Modern GPUs allow increasingly complex visual scenes to be rendered interactively."
-  },
-  {
-    title: "Virtual Production",
-    text: "LED stages and real-time environments allow filmmakers to combine physical and digital production."
-  },
-  {
-    title: "Procedural Generation",
-    text: "Procedural systems can create complex environments, materials and effects from rules and parameters."
-  },
-  {
-    title: "Digital Humans",
-    text: "Character technology continues to advance through better modeling, rigging, simulation and rendering."
-  },
-  {
-    title: "Immersive Worlds",
-    text: "VR, AR and spatial computing are creating new contexts for 3D experiences."
-  }
-];
+  [
+    "AI-Assisted CGI",
+    "AI tools can assist with ideation, asset generation, animation, compositing and workflow automation."
+  ],
+  [
+    "Real-Time Rendering",
+    "Modern GPUs allow increasingly complex visual scenes to be rendered interactively."
+  ],
+  [
+    "Virtual Production",
+    "LED stages and real-time environments allow filmmakers to combine physical and digital production."
+  ],
+  [
+    "Procedural Generation",
+    "Procedural systems can create complex environments, materials and effects from rules and parameters."
+  ],
+  [
+    "Digital Humans",
+    "Character technology continues to advance through better modeling, rigging, simulation and rendering."
+  ],
+  [
+    "Immersive Worlds",
+    "VR, AR and spatial computing are creating new contexts for 3D experiences."
+  ]
+].map(([title, text]) => ({
+  title,
+  text
+}));
 
 
 const roadmap = [
-  {
-    phase: "01",
-    title: "Understand 3D",
-    text: "Learn coordinates, geometry, cameras, lights and basic scene structure."
-  },
-  {
-    phase: "02",
-    title: "Learn Modeling",
-    text: "Practice creating objects from primitives and progressively more complex topology."
-  },
-  {
-    phase: "03",
-    title: "Learn Materials",
-    text: "Study color, roughness, metalness, transparency and texture mapping."
-  },
-  {
-    phase: "04",
-    title: "Learn Lighting",
-    text: "Practice key lights, fill lights, rim lights, shadows and environment lighting."
-  },
-  {
-    phase: "05",
-    title: "Learn Animation",
-    text: "Explore keyframes, timing, interpolation, character movement and simulation."
-  },
-  {
-    phase: "06",
-    title: "Learn Rendering",
-    text: "Understand resolution, samples, lighting quality, composition and output."
-  },
-  {
-    phase: "07",
-    title: "Build Projects",
-    text: "Create complete scenes rather than isolated exercises."
-  },
-  {
-    phase: "08",
-    title: "Build a Portfolio",
-    text: "Select your strongest work and present the process behind each project."
-  }
-];
+  [
+    "01",
+    "Understand 3D",
+    "Learn coordinates, geometry, cameras, lights and basic scene structure."
+  ],
+  [
+    "02",
+    "Learn Modeling",
+    "Practice creating objects from primitives and progressively more complex topology."
+  ],
+  [
+    "03",
+    "Learn Materials",
+    "Study color, roughness, metalness, transparency and texture mapping."
+  ],
+  [
+    "04",
+    "Learn Lighting",
+    "Practice key lights, fill lights, rim lights, shadows and environment lighting."
+  ],
+  [
+    "05",
+    "Learn Animation",
+    "Explore keyframes, timing, interpolation, character movement and simulation."
+  ],
+  [
+    "06",
+    "Learn Rendering",
+    "Understand resolution, samples, lighting quality, composition and output."
+  ],
+  [
+    "07",
+    "Build Projects",
+    "Create complete scenes rather than isolated exercises."
+  ],
+  [
+    "08",
+    "Build a Portfolio",
+    "Select your strongest work and present the process behind each project."
+  ]
+].map(([phase, title, text]) => ({
+  phase,
+  title,
+  text
+}));
+
+
+const $ = id => document.getElementById(id);
 
 
 /* =========================================================
-   DOM HELPERS
+   TOAST
 ========================================================= */
-
-const $ = (id) => document.getElementById(id);
 
 function showToast(message) {
   const toast = $("toast");
@@ -292,6 +325,7 @@ function showToast(message) {
   if (!toast) return;
 
   toast.textContent = message;
+
   toast.classList.add("show");
 
   clearTimeout(showToast.timer);
@@ -310,9 +344,9 @@ function readStorage(key, fallback) {
   try {
     const value = localStorage.getItem(key);
 
-    if (!value) return fallback;
-
-    return JSON.parse(value);
+    return value
+      ? JSON.parse(value)
+      : fallback;
   } catch {
     return fallback;
   }
@@ -321,9 +355,15 @@ function readStorage(key, fallback) {
 
 function writeStorage(key, value) {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    localStorage.setItem(
+      key,
+      JSON.stringify(value)
+    );
   } catch (error) {
-    console.warn("Storage error:", error);
+    console.warn(
+      "Storage error:",
+      error
+    );
   }
 }
 
@@ -333,71 +373,104 @@ function writeStorage(key, value) {
 ========================================================= */
 
 function route() {
-  const requested = location.hash.replace("#", "") || "home";
+  const requested =
+    location.hash.replace("#", "") ||
+    "home";
 
-  const page = $(
-    requested
-  );
+  const page = $(requested);
 
-  document.querySelectorAll(".page").forEach((element) => {
-    element.classList.remove("active");
-  });
+  document
+    .querySelectorAll(".page")
+    .forEach(element => {
+      element.classList.remove("active");
+    });
 
-  if (page && page.classList.contains("page")) {
+  if (
+    page &&
+    page.classList.contains("page")
+  ) {
     page.classList.add("active");
   } else {
     $("home")?.classList.add("active");
   }
 
-  document.querySelectorAll(".main-nav a").forEach((link) => {
-    link.classList.toggle(
-      "active",
-      link.getAttribute("href") === `#${requested}`
-    );
-  });
+  document
+    .querySelectorAll(".main-nav a")
+    .forEach(link => {
+      link.classList.toggle(
+        "active",
+        link.getAttribute("href") ===
+          `#${requested}`
+      );
+    });
 
   $("mainNav")?.classList.remove("open");
-  $("menuToggle")?.setAttribute("aria-expanded", "false");
+
+  $("menuToggle")?.setAttribute(
+    "aria-expanded",
+    "false"
+  );
 
   if (requested === "studio") {
-    setTimeout(() => {
-      resizeRenderer();
-    }, 50);
+    setTimeout(
+      resizeRenderer,
+      50
+    );
   }
 
   window.scrollTo({
     top: 0,
-    behavior: S.settings.reduceMotion ? "auto" : "smooth"
+    behavior: S.settings.reduceMotion
+      ? "auto"
+      : "smooth"
   });
 }
 
 
 /* =========================================================
-   MOBILE NAVIGATION
+   NAVIGATION
 ========================================================= */
 
 function initializeNavigation() {
-  $("menuToggle")?.addEventListener("click", () => {
-    const nav = $("mainNav");
+  $("menuToggle")?.addEventListener(
+    "click",
+    () => {
+      const nav = $("mainNav");
 
-    if (!nav) return;
+      if (!nav) return;
 
-    const open = nav.classList.toggle("open");
+      const open =
+        nav.classList.toggle("open");
 
-    $("menuToggle").setAttribute(
-      "aria-expanded",
-      String(open)
-    );
-  });
+      $("menuToggle").setAttribute(
+        "aria-expanded",
+        String(open)
+      );
+    }
+  );
 
-  document.querySelectorAll(".main-nav a").forEach((link) => {
-    link.addEventListener("click", () => {
-      $("mainNav")?.classList.remove("open");
-      $("menuToggle")?.setAttribute("aria-expanded", "false");
+  document
+    .querySelectorAll(".main-nav a")
+    .forEach(link => {
+      link.addEventListener(
+        "click",
+        () => {
+          $("mainNav")?.classList.remove(
+            "open"
+          );
+
+          $("menuToggle")?.setAttribute(
+            "aria-expanded",
+            "false"
+          );
+        }
+      );
     });
-  });
 
-  window.addEventListener("hashchange", route);
+  window.addEventListener(
+    "hashchange",
+    route
+  );
 }
 
 
@@ -410,31 +483,54 @@ function renderNotes(filter = "") {
 
   if (!grid) return;
 
-  const query = filter.trim().toLowerCase();
+  const q =
+    filter.trim().toLowerCase();
 
-  const results = notes.filter((note) => {
-    return (
-      !query ||
-      note.title.toLowerCase().includes(query) ||
-      note.text.toLowerCase().includes(query) ||
-      note.tag.toLowerCase().includes(query)
-    );
-  });
+  const results =
+    notes.filter(note => {
+      return (
+        !q ||
+        note.title
+          .toLowerCase()
+          .includes(q) ||
+        note.text
+          .toLowerCase()
+          .includes(q) ||
+        note.tag
+          .toLowerCase()
+          .includes(q)
+      );
+    });
 
-  grid.innerHTML = results.length
-    ? results.map((note) => `
-        <article class="note">
-          <small>${escapeHtml(note.tag)}</small>
-          <h3>${escapeHtml(note.title)}</h3>
-          <p>${escapeHtml(note.text)}</p>
-        </article>
-      `).join("")
-    : `
-        <article class="card">
-          <h3>No notes found</h3>
-          <p>Try a different search term.</p>
-        </article>
-      `;
+  grid.innerHTML =
+    results.length
+      ? results
+          .map(
+            note => `
+              <article class="note">
+                <small>
+                  ${escapeHtml(note.tag)}
+                </small>
+
+                <h3>
+                  ${escapeHtml(note.title)}
+                </h3>
+
+                <p>
+                  ${escapeHtml(note.text)}
+                </p>
+              </article>
+            `
+          )
+          .join("")
+      : `
+          <article class="card">
+            <h3>No notes found</h3>
+            <p>
+              Try a different search term.
+            </p>
+          </article>
+        `;
 }
 
 
@@ -443,17 +539,33 @@ function renderNotes(filter = "") {
 ========================================================= */
 
 function renderHistory() {
-  const timeline = $("timeline");
+  const element =
+    $("timeline");
 
-  if (!timeline) return;
+  if (!element) return;
 
-  timeline.innerHTML = history.map(item => `
-    <article class="timeline-item">
-      <span class="year">${escapeHtml(item.year)}</span>
-      <h3>${escapeHtml(item.title)}</h3>
-      <p>${escapeHtml(item.text)}</p>
-    </article>
-  `).join("");
+  element.innerHTML =
+    history
+      .map(
+        item => `
+          <article class="timeline-item">
+
+            <span class="year">
+              ${escapeHtml(item.year)}
+            </span>
+
+            <h3>
+              ${escapeHtml(item.title)}
+            </h3>
+
+            <p>
+              ${escapeHtml(item.text)}
+            </p>
+
+          </article>
+        `
+      )
+      .join("");
 }
 
 
@@ -462,24 +574,43 @@ function renderHistory() {
 ========================================================= */
 
 function renderTutorials() {
-  const grid = $("tutorialGrid");
+  const element =
+    $("tutorialGrid");
 
-  if (!grid) return;
+  if (!element) return;
 
-  grid.innerHTML = tutorials.map(item => `
-    <article class="tutorial">
-      <div class="eyebrow">${escapeHtml(item.type)}</div>
+  element.innerHTML =
+    tutorials
+      .map(
+        item => `
+          <article class="tutorial">
 
-      <h3>${escapeHtml(item.title)}</h3>
+            <div class="eyebrow">
+              ${escapeHtml(item.type)}
+            </div>
 
-      <p>${escapeHtml(item.text)}</p>
+            <h3>
+              ${escapeHtml(item.title)}
+            </h3>
 
-      <div class="tutorial-meta">
-        <span>${escapeHtml(item.level)}</span>
-        <span>${escapeHtml(item.duration)}</span>
-      </div>
-    </article>
-  `).join("");
+            <p>
+              ${escapeHtml(item.text)}
+            </p>
+
+            <div class="tutorial-meta">
+              <span>
+                ${escapeHtml(item.level)}
+              </span>
+
+              <span>
+                ${escapeHtml(item.duration)}
+              </span>
+            </div>
+
+          </article>
+        `
+      )
+      .join("");
 }
 
 
@@ -488,38 +619,68 @@ function renderTutorials() {
 ========================================================= */
 
 function renderFuture() {
-  const grid = $("futureGrid");
+  const element =
+    $("futureGrid");
 
-  if (!grid) return;
+  if (!element) return;
 
-  grid.innerHTML = future.map(item => `
-    <article class="future">
-      <h3>${escapeHtml(item.title)}</h3>
-      <p>${escapeHtml(item.text)}</p>
-    </article>
-  `).join("");
+  element.innerHTML =
+    future
+      .map(
+        item => `
+          <article class="future">
+
+            <h3>
+              ${escapeHtml(item.title)}
+            </h3>
+
+            <p>
+              ${escapeHtml(item.text)}
+            </p>
+
+          </article>
+        `
+      )
+      .join("");
 }
 
 
 /* =========================================================
-   BEGINNER GUIDE
+   ROADMAP
 ========================================================= */
 
 function renderRoadmap() {
-  const roadmapElement = $("roadmap");
+  const element =
+    $("roadmap");
 
-  if (!roadmapElement) return;
+  if (!element) return;
 
-  roadmapElement.innerHTML = roadmap.map(item => `
-    <article class="roadmap-item">
-      <div class="phase">${escapeHtml(item.phase)}</div>
+  element.innerHTML =
+    roadmap
+      .map(
+        item => `
+          <article class="roadmap-item">
 
-      <div>
-        <h3>${escapeHtml(item.title)}</h3>
-        <p>${escapeHtml(item.text)}</p>
-      </div>
-    </article>
-  `).join("");
+            <div class="phase">
+              ${escapeHtml(item.phase)}
+            </div>
+
+            <div>
+
+              <h3>
+                ${escapeHtml(item.title)}
+              </h3>
+
+              <p>
+                ${escapeHtml(item.text)}
+              </p>
+
+            </div>
+
+          </article>
+        `
+      )
+      .join("");
 }
 
 
@@ -528,142 +689,298 @@ function renderRoadmap() {
 ========================================================= */
 
 function initializeThree() {
-  const container = $("scene-container");
+  const container =
+    $("scene-container");
 
-  if (!container) return;
+  if (!container) {
+    console.warn(
+      "scene-container was not found."
+    );
 
-  S.scene = new THREE.Scene();
+    return;
+  }
 
-  S.scene.background = new THREE.Color(0x050812);
 
-  S.camera = new THREE.PerspectiveCamera(
-    45,
-    container.clientWidth / container.clientHeight,
-    0.1,
-    1000
+  /* -------------------------------------------------------
+     SCENE
+  ------------------------------------------------------- */
+
+  S.scene =
+    new THREE.Scene();
+
+  S.scene.background =
+    new THREE.Color(
+      0x050812
+    );
+
+
+  /* -------------------------------------------------------
+     CAMERA
+  ------------------------------------------------------- */
+
+  const width =
+    Math.max(
+      container.clientWidth,
+      320
+    );
+
+  const height =
+    Math.max(
+      container.clientHeight,
+      420
+    );
+
+  S.camera =
+    new THREE.PerspectiveCamera(
+      45,
+      width / height,
+      0.1,
+      1000
+    );
+
+  S.camera.position.set(
+    8,
+    4.5,
+    10
   );
 
-  S.camera.position.set(7, 5, 9);
 
-  S.renderer = new THREE.WebGLRenderer({
-    antialias: true,
-    preserveDrawingBuffer: true
-  });
+  /* -------------------------------------------------------
+     RENDERER
+  ------------------------------------------------------- */
+
+  S.renderer =
+    new THREE.WebGLRenderer({
+      antialias: true,
+      preserveDrawingBuffer: true
+    });
 
   S.renderer.setPixelRatio(
-    Math.min(window.devicePixelRatio, 2)
+    Math.min(
+      window.devicePixelRatio || 1,
+      2
+    )
   );
 
   S.renderer.setSize(
-    container.clientWidth,
-    container.clientHeight
+    width,
+    height
   );
 
-  S.renderer.shadowMap.enabled = true;
-  S.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  S.renderer.shadowMap.enabled =
+    true;
+
+  S.renderer.shadowMap.type =
+    THREE.PCFSoftShadowMap;
+
 
   container.innerHTML = "";
-  container.appendChild(S.renderer.domElement);
 
-
-  S.controls = new OrbitControls(
-    S.camera,
+  container.appendChild(
     S.renderer.domElement
   );
 
-  S.controls.enableDamping = true;
-  S.controls.target.set(0, 0.5, 0);
 
+  /* -------------------------------------------------------
+     ORBIT CONTROLS
+  ------------------------------------------------------- */
 
-  /* Lights */
+  S.controls =
+    new OrbitControls(
+      S.camera,
+      S.renderer.domElement
+    );
 
-  const ambient = new THREE.HemisphereLight(
-    0x9fdcff,
-    0x080812,
-    2.2
+  S.controls.enableDamping =
+    true;
+
+  S.controls.target.set(
+    0,
+    1.0,
+    0
   );
 
-  S.scene.add(ambient);
 
+  /* -------------------------------------------------------
+     LIGHTING
+  ------------------------------------------------------- */
 
-  const keyLight = new THREE.DirectionalLight(
-    0xffffff,
-    3
+  const hemisphere =
+    new THREE.HemisphereLight(
+      0x9fdcff,
+      0x080812,
+      2.2
+    );
+
+  S.scene.add(
+    hemisphere
   );
 
-  keyLight.position.set(5, 9, 6);
-  keyLight.castShadow = true;
 
-  S.scene.add(keyLight);
+  const key =
+    new THREE.DirectionalLight(
+      0xffffff,
+      3
+    );
 
-
-  const rimLight = new THREE.PointLight(
-    0x22d3ee,
-    35,
-    30
+  key.position.set(
+    5,
+    9,
+    6
   );
 
-  rimLight.position.set(-5, 4, -5);
+  key.castShadow =
+    true;
 
-  S.scene.add(rimLight);
+  S.scene.add(key);
 
 
-  const purpleLight = new THREE.PointLight(
-    0xa855f7,
-    30,
-    25
+  const rim =
+    new THREE.PointLight(
+      0x22d3ee,
+      35,
+      30
+    );
+
+  rim.position.set(
+    -5,
+    4,
+    -5
   );
 
-  purpleLight.position.set(5, 2, -5);
-
-  S.scene.add(purpleLight);
+  S.scene.add(rim);
 
 
-  /* Ground */
+  const purple =
+    new THREE.PointLight(
+      0xa855f7,
+      30,
+      25
+    );
 
-  const groundMaterial = new THREE.MeshStandardMaterial({
-    color: 0x0a1020,
-    roughness: 0.85,
-    metalness: 0.1
-  });
-
-  const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(30, 30),
-    groundMaterial
+  purple.position.set(
+    5,
+    2,
+    -5
   );
 
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.y = -1.5;
-
-  ground.receiveShadow = true;
-
-  ground.userData.environment = true;
-
-  S.scene.add(ground);
+  S.scene.add(purple);
 
 
-  /* Grid */
+  /* -------------------------------------------------------
+     GROUND
+  ------------------------------------------------------- */
 
-  S.grid = new THREE.GridHelper(
-    30,
-    30,
-    0x22d3ee,
-    0x172033
+  const ground =
+    new THREE.Mesh(
+      new THREE.PlaneGeometry(
+        30,
+        30
+      ),
+      new THREE.MeshStandardMaterial({
+        color: 0x0a1020,
+        roughness: 0.85,
+        metalness: 0.1
+      })
+    );
+
+  ground.rotation.x =
+    -Math.PI / 2;
+
+  ground.position.y =
+    -1.5;
+
+  ground.receiveShadow =
+    true;
+
+  ground.userData.environment =
+    true;
+
+  S.scene.add(
+    ground
   );
 
-  S.grid.position.y = -1.49;
 
-  S.scene.add(S.grid);
+  /* -------------------------------------------------------
+     GRID
+  ------------------------------------------------------- */
+
+  S.grid =
+    new THREE.GridHelper(
+      30,
+      30,
+      0x22d3ee,
+      0x172033
+    );
+
+  S.grid.position.y =
+    -1.49;
+
+  S.scene.add(
+    S.grid
+  );
 
 
-  /* Starter object */
+  /* =======================================================
+     STARTER CUBE
+  ======================================================= */
 
-  createObject("cube", {
-    x: 0,
-    y: -0.5,
-    z: 0,
-    name: "Starter Cube"
-  });
+  createObject(
+    "cube",
+    {
+      x: -2.2,
+      y: -0.9,
+      z: 0,
+
+      name: "Starter Cube",
+
+      color: 0x22d3ee
+    }
+  );
+
+
+  /* =======================================================
+     ACTUAL 3D HUMAN CHARACTER
+     IMPORTANT:
+     The character is intentionally created here so that
+     it appears automatically when Studio opens.
+  ======================================================= */
+
+  createObject(
+    "human",
+    {
+      x: 2.0,
+
+      /*
+        The human is raised above the ground so its
+        complete body, legs and feet are visible.
+      */
+      y: 1.4,
+
+      z: 0,
+
+      name: "Human Character"
+    }
+  );
+
+
+  /* -------------------------------------------------------
+     CAMERA TARGET
+  ------------------------------------------------------- */
+
+  S.camera.position.set(
+    8,
+    4.5,
+    10
+  );
+
+  S.controls.target.set(
+    0,
+    1.0,
+    0
+  );
+
+  S.controls.update();
 
 
   resizeRenderer();
@@ -674,214 +991,344 @@ function initializeThree() {
 
 /* =========================================================
    HUMAN CHARACTER
+   =========================================================
+   This creates the actual visible 3D person.
+
+   Body parts:
+   - Head
+   - Hair
+   - Eyes
+   - Pupils
+   - Nose
+   - Neck
+   - Torso
+   - Pelvis
+   - Arms
+   - Hands
+   - Legs
+   - Feet
 ========================================================= */
 
-function createHumanCharacter(data = {}) {
-  const root = new THREE.Group();
+function createHumanCharacter(
+  data = {}
+) {
+  const root =
+    new THREE.Group();
 
-  root.name = data.name || "Human Character";
 
-  /*
-   * Important:
-   * The root is positioned at y = 0.68 so the feet sit
-   * naturally on the Studio ground at approximately -1.5.
-   */
+  root.name =
+    data.name ||
+    "Human Character";
+
 
   root.position.set(
     data.x ?? 0,
-    data.y ?? 0.68,
+    data.y ?? 1.4,
     data.z ?? 0
   );
 
-  root.rotation.y = data.rotationY ?? 0;
 
-  root.userData.type = "Human";
-  root.userData.selectableRoot = true;
-  root.userData.character = true;
+  root.rotation.y =
+    data.rotationY ?? 0;
 
 
-  const skin = new THREE.MeshStandardMaterial({
-    color: 0xf0b58e,
-    roughness: 0.65
-  });
-
-  const shirt = new THREE.MeshStandardMaterial({
-    color: data.color ?? 0x2563eb,
-    roughness: 0.7
-  });
-
-  const pants = new THREE.MeshStandardMaterial({
-    color: 0x18243d,
-    roughness: 0.75
-  });
-
-  const shoes = new THREE.MeshStandardMaterial({
-    color: 0x101010,
-    roughness: 0.6
-  });
-
-  const hair = new THREE.MeshStandardMaterial({
-    color: 0x17120f,
-    roughness: 0.9
-  });
-
-  const eyeWhite = new THREE.MeshStandardMaterial({
-    color: 0xffffff,
-    roughness: 0.25
-  });
-
-  const pupil = new THREE.MeshStandardMaterial({
-    color: 0x050505,
-    roughness: 0.2
-  });
+  root.userData.type =
+    "Human";
 
 
-  function mesh(geometry, material, name) {
-    const object = new THREE.Mesh(
-      geometry,
-      material
-    );
+  root.userData.selectableRoot =
+    true;
 
-    object.name = name;
 
-    object.castShadow = true;
-    object.receiveShadow = true;
+  root.userData.character =
+    true;
+
+
+  /* -------------------------------------------------------
+     MATERIALS
+  ------------------------------------------------------- */
+
+  const skin =
+    new THREE.MeshStandardMaterial({
+      color: 0xf0b58e,
+      roughness: 0.65
+    });
+
+
+  const shirt =
+    new THREE.MeshStandardMaterial({
+      color:
+        data.color ??
+        0x2563eb,
+      roughness: 0.7
+    });
+
+
+  const pants =
+    new THREE.MeshStandardMaterial({
+      color: 0x18243d,
+      roughness: 0.75
+    });
+
+
+  const shoes =
+    new THREE.MeshStandardMaterial({
+      color: 0x101010,
+      roughness: 0.6
+    });
+
+
+  const hair =
+    new THREE.MeshStandardMaterial({
+      color: 0x17120f,
+      roughness: 0.9
+    });
+
+
+  const eyeWhite =
+    new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      roughness: 0.25
+    });
+
+
+  const pupil =
+    new THREE.MeshStandardMaterial({
+      color: 0x050505,
+      roughness: 0.2
+    });
+
+
+  /* -------------------------------------------------------
+     MESH HELPER
+  ------------------------------------------------------- */
+
+  function mesh(
+    geometry,
+    material,
+    name
+  ) {
+    const object =
+      new THREE.Mesh(
+        geometry,
+        material
+      );
+
+    object.name =
+      name;
+
+    object.castShadow =
+      true;
+
+    object.receiveShadow =
+      true;
 
     return object;
   }
 
 
-  /* Torso */
+  /* =======================================================
+     TORSO
+  ======================================================= */
 
-  const torso = mesh(
-    new THREE.BoxGeometry(1.35, 1.65, 0.72),
-    shirt,
-    "Torso"
-  );
-
-  torso.position.y = 1.55;
-
-  root.add(torso);
-
-
-  /* Pelvis */
-
-  const pelvis = mesh(
-    new THREE.BoxGeometry(1.15, 0.55, 0.68),
-    pants,
-    "Pelvis"
-  );
-
-  pelvis.position.y = 0.55;
-
-  root.add(pelvis);
-
-
-  /* Neck */
-
-  const neck = mesh(
-    new THREE.CylinderGeometry(
-      0.22,
-      0.22,
-      0.32,
-      16
-    ),
-    skin,
-    "Neck"
-  );
-
-  neck.position.y = 2.52;
-
-  root.add(neck);
-
-
-  /* Head */
-
-  const head = mesh(
-    new THREE.SphereGeometry(
-      0.62,
-      24,
-      18
-    ),
-    skin,
-    "Head"
-  );
-
-  head.scale.set(0.92, 1.08, 0.92);
-  head.position.y = 3.22;
-
-  root.add(head);
-
-
-  /* Hair */
-
-  const hairMesh = mesh(
-    new THREE.SphereGeometry(
-      0.65,
-      24,
-      16,
-      0,
-      Math.PI * 2,
-      0,
-      Math.PI * 0.58
-    ),
-    hair,
-    "Hair"
-  );
-
-  hairMesh.scale.set(0.94, 1.05, 0.94);
-  hairMesh.position.y = 3.43;
-
-  root.add(hairMesh);
-
-
-  /* Eyes */
-
-  [-0.22, 0.22].forEach((x, index) => {
-    const eye = mesh(
-      new THREE.SphereGeometry(0.105, 16, 12),
-      eyeWhite,
-      `Eye ${index + 1}`
+  const torso =
+    mesh(
+      new THREE.BoxGeometry(
+        1.35,
+        1.65,
+        0.72
+      ),
+      shirt,
+      "Torso"
     );
 
-    eye.position.set(
-      x,
-      3.25,
-      0.57
-    );
+  torso.position.y =
+    1.55;
 
-    root.add(eye);
-
-
-    const pupilMesh = mesh(
-      new THREE.SphereGeometry(0.048, 12, 10),
-      pupil,
-      `Pupil ${index + 1}`
-    );
-
-    pupilMesh.position.set(
-      x,
-      3.25,
-      0.66
-    );
-
-    root.add(pupilMesh);
-  });
-
-
-  /* Nose */
-
-  const nose = mesh(
-    new THREE.ConeGeometry(
-      0.07,
-      0.22,
-      12
-    ),
-    skin,
-    "Nose"
+  root.add(
+    torso
   );
 
-  nose.rotation.x = Math.PI / 2;
+
+  /* =======================================================
+     PELVIS
+  ======================================================= */
+
+  const pelvis =
+    mesh(
+      new THREE.BoxGeometry(
+        1.15,
+        0.55,
+        0.68
+      ),
+      pants,
+      "Pelvis"
+    );
+
+  pelvis.position.y =
+    0.55;
+
+  root.add(
+    pelvis
+  );
+
+
+  /* =======================================================
+     NECK
+  ======================================================= */
+
+  const neck =
+    mesh(
+      new THREE.CylinderGeometry(
+        0.22,
+        0.22,
+        0.32,
+        16
+      ),
+      skin,
+      "Neck"
+    );
+
+  neck.position.y =
+    2.52;
+
+  root.add(
+    neck
+  );
+
+
+  /* =======================================================
+     HEAD
+  ======================================================= */
+
+  const head =
+    mesh(
+      new THREE.SphereGeometry(
+        0.62,
+        24,
+        18
+      ),
+      skin,
+      "Head"
+    );
+
+  head.scale.set(
+    0.92,
+    1.08,
+    0.92
+  );
+
+  head.position.y =
+    3.22;
+
+  root.add(
+    head
+  );
+
+
+  /* =======================================================
+     HAIR
+  ======================================================= */
+
+  const hairMesh =
+    mesh(
+      new THREE.SphereGeometry(
+        0.65,
+        24,
+        16,
+        0,
+        Math.PI * 2,
+        0,
+        Math.PI * 0.58
+      ),
+      hair,
+      "Hair"
+    );
+
+  hairMesh.scale.set(
+    0.94,
+    1.05,
+    0.94
+  );
+
+  hairMesh.position.y =
+    3.43;
+
+  root.add(
+    hairMesh
+  );
+
+
+  /* =======================================================
+     EYES
+  ======================================================= */
+
+  [-0.22, 0.22].forEach(
+    (x, index) => {
+
+      const eye =
+        mesh(
+          new THREE.SphereGeometry(
+            0.105,
+            16,
+            12
+          ),
+          eyeWhite,
+          `Eye ${index + 1}`
+        );
+
+      eye.position.set(
+        x,
+        3.25,
+        0.57
+      );
+
+      root.add(
+        eye
+      );
+
+
+      const pupilMesh =
+        mesh(
+          new THREE.SphereGeometry(
+            0.048,
+            12,
+            10
+          ),
+          pupil,
+          `Pupil ${index + 1}`
+        );
+
+      pupilMesh.position.set(
+        x,
+        3.25,
+        0.66
+      );
+
+      root.add(
+        pupilMesh
+      );
+    }
+  );
+
+
+  /* =======================================================
+     NOSE
+  ======================================================= */
+
+  const nose =
+    mesh(
+      new THREE.ConeGeometry(
+        0.07,
+        0.22,
+        12
+      ),
+      skin,
+      "Nose"
+    );
+
+  nose.rotation.x =
+    Math.PI / 2;
 
   nose.position.set(
     0,
@@ -889,294 +1336,266 @@ function createHumanCharacter(data = {}) {
     0.63
   );
 
-  root.add(nose);
-
-
-  /* Shoulders / arms */
-
-  const leftShoulder = new THREE.Group();
-  leftShoulder.name = "Left Arm";
-
-  leftShoulder.position.set(
-    -0.82,
-    2.18,
-    0
+  root.add(
+    nose
   );
 
-  root.add(leftShoulder);
 
+  /* =======================================================
+     ARMS
+  ======================================================= */
+
+  function makeArm(
+    side,
+    x
+  ) {
+    const shoulder =
+      new THREE.Group();
+
+    shoulder.name =
+      `${side} Arm`;
 
-  const leftUpperArm = mesh(
-    new THREE.CapsuleGeometry(
-      0.18,
-      0.65,
-      8,
-      12
-    ),
-    shirt,
-    "Left Upper Arm"
-  );
+    shoulder.position.set(
+      x,
+      2.18,
+      0
+    );
 
-  leftUpperArm.position.y = -0.38;
+    root.add(
+      shoulder
+    );
+
+
+    const upper =
+      mesh(
+        new THREE.CylinderGeometry(
+          0.18,
+          0.18,
+          0.82,
+          16
+        ),
+        shirt,
+        `${side} Upper Arm`
+      );
+
+    upper.position.y =
+      -0.40;
 
-  leftShoulder.add(leftUpperArm);
+    shoulder.add(
+      upper
+    );
+
+
+    const elbow =
+      new THREE.Group();
+
+    elbow.position.y =
+      -0.80;
+
+    shoulder.add(
+      elbow
+    );
+
+
+    const lower =
+      mesh(
+        new THREE.CylinderGeometry(
+          0.16,
+          0.16,
+          0.76,
+          16
+        ),
+        skin,
+        `${side} Lower Arm`
+      );
+
+    lower.position.y =
+      -0.38;
 
-
-  const leftElbow = new THREE.Group();
-
-  leftElbow.position.y = -0.76;
-
-  leftShoulder.add(leftElbow);
-
-
-  const leftLowerArm = mesh(
-    new THREE.CapsuleGeometry(
-      0.16,
-      0.62,
-      8,
-      12
-    ),
-    skin,
-    "Left Lower Arm"
-  );
-
-  leftLowerArm.position.y = -0.34;
-
-  leftElbow.add(leftLowerArm);
-
-
-  const leftHand = mesh(
-    new THREE.SphereGeometry(0.2, 16, 12),
-    skin,
-    "Left Hand"
-  );
-
-  leftHand.position.y = -0.72;
-
-  leftElbow.add(leftHand);
-
-
-  const rightShoulder = new THREE.Group();
-
-  rightShoulder.name = "Right Arm";
-
-  rightShoulder.position.set(
-    0.82,
-    2.18,
-    0
-  );
-
-  root.add(rightShoulder);
-
-
-  const rightUpperArm = mesh(
-    new THREE.CapsuleGeometry(
-      0.18,
-      0.65,
-      8,
-      12
-    ),
-    shirt,
-    "Right Upper Arm"
-  );
-
-  rightUpperArm.position.y = -0.38;
-
-  rightShoulder.add(rightUpperArm);
-
-
-  const rightElbow = new THREE.Group();
-
-  rightElbow.position.y = -0.76;
-
-  rightShoulder.add(rightElbow);
-
-
-  const rightLowerArm = mesh(
-    new THREE.CapsuleGeometry(
-      0.16,
-      0.62,
-      8,
-      12
-    ),
-    skin,
-    "Right Lower Arm"
-  );
-
-  rightLowerArm.position.y = -0.34;
-
-  rightElbow.add(rightLowerArm);
-
-
-  const rightHand = mesh(
-    new THREE.SphereGeometry(0.2, 16, 12),
-    skin,
-    "Right Hand"
-  );
-
-  rightHand.position.y = -0.72;
-
-  rightElbow.add(rightHand);
-
-
-  /* Legs */
-
-  const leftHip = new THREE.Group();
-
-  leftHip.name = "Left Leg";
-
-  leftHip.position.set(
-    -0.34,
-    0.3,
-    0
-  );
-
-  root.add(leftHip);
-
-
-  const leftThigh = mesh(
-    new THREE.CapsuleGeometry(
-      0.23,
-      0.72,
-      8,
-      12
-    ),
-    pants,
-    "Left Thigh"
-  );
-
-  leftThigh.position.y = -0.48;
-
-  leftHip.add(leftThigh);
-
-
-  const leftKnee = new THREE.Group();
-
-  leftKnee.position.y = -0.94;
-
-  leftHip.add(leftKnee);
-
-
-  const leftShin = mesh(
-    new THREE.CapsuleGeometry(
-      0.18,
-      0.75,
-      8,
-      12
-    ),
-    pants,
-    "Left Shin"
-  );
-
-  leftShin.position.y = -0.42;
-
-  leftKnee.add(leftShin);
-
-
-  const leftFoot = mesh(
-    new THREE.BoxGeometry(
-      0.42,
-      0.22,
-      0.72
-    ),
-    shoes,
-    "Left Foot"
-  );
-
-  leftFoot.position.set(
-    0,
-    -0.88,
-    0.18
-  );
-
-  leftKnee.add(leftFoot);
-
-
-  const rightHip = new THREE.Group();
-
-  rightHip.name = "Right Leg";
-
-  rightHip.position.set(
-    0.34,
-    0.3,
-    0
-  );
-
-  root.add(rightHip);
-
-
-  const rightThigh = mesh(
-    new THREE.CapsuleGeometry(
-      0.23,
-      0.72,
-      8,
-      12
-    ),
-    pants,
-    "Right Thigh"
-  );
-
-  rightThigh.position.y = -0.48;
-
-  rightHip.add(rightThigh);
-
-
-  const rightKnee = new THREE.Group();
-
-  rightKnee.position.y = -0.94;
-
-  rightHip.add(rightKnee);
-
-
-  const rightShin = mesh(
-    new THREE.CapsuleGeometry(
-      0.18,
-      0.75,
-      8,
-      12
-    ),
-    pants,
-    "Right Shin"
-  );
-
-  rightShin.position.y = -0.42;
-
-  rightKnee.add(rightShin);
-
-
-  const rightFoot = mesh(
-    new THREE.BoxGeometry(
-      0.42,
-      0.22,
-      0.72
-    ),
-    shoes,
-    "Right Foot"
-  );
-
-  rightFoot.position.set(
-    0,
-    -0.88,
-    0.18
-  );
-
-  rightKnee.add(rightFoot);
-
+    elbow.add(
+      lower
+    );
+
+
+    const hand =
+      mesh(
+        new THREE.SphereGeometry(
+          0.2,
+          16,
+          12
+        ),
+        skin,
+        `${side} Hand`
+      );
+
+    hand.position.y =
+      -0.78;
+
+    elbow.add(
+      hand
+    );
+
+
+    return shoulder;
+  }
+
+
+  const leftArm =
+    makeArm(
+      "Left",
+      -0.82
+    );
+
+
+  const rightArm =
+    makeArm(
+      "Right",
+      0.82
+    );
+
+
+  /* =======================================================
+     LEGS
+  ======================================================= */
+
+  function makeLeg(
+    side,
+    x
+  ) {
+    const hip =
+      new THREE.Group();
+
+    hip.name =
+      `${side} Leg`;
+
+    hip.position.set(
+      x,
+      0.3,
+      0
+    );
+
+    root.add(
+      hip
+    );
+
+
+    const thigh =
+      mesh(
+        new THREE.CylinderGeometry(
+          0.23,
+          0.23,
+          0.95,
+          16
+        ),
+        pants,
+        `${side} Thigh`
+      );
+
+    thigh.position.y =
+      -0.48;
+
+    hip.add(
+      thigh
+    );
+
+
+    const knee =
+      new THREE.Group();
+
+    knee.position.y =
+      -0.94;
+
+    hip.add(
+      knee
+    );
+
+
+    const shin =
+      mesh(
+        new THREE.CylinderGeometry(
+          0.18,
+          0.18,
+          0.98,
+          16
+        ),
+        pants,
+        `${side} Shin`
+      );
+
+    shin.position.y =
+      -0.42;
+
+    knee.add(
+      shin
+    );
+
+
+    const foot =
+      mesh(
+        new THREE.BoxGeometry(
+          0.42,
+          0.22,
+          0.72
+        ),
+        shoes,
+        `${side} Foot`
+      );
+
+    foot.position.set(
+      0,
+      -0.88,
+      0.18
+    );
+
+    knee.add(
+      foot
+    );
+
+
+    return hip;
+  }
+
+
+  const leftLeg =
+    makeLeg(
+      "Left",
+      -0.34
+    );
+
+
+  const rightLeg =
+    makeLeg(
+      "Right",
+      0.34
+    );
+
+
+  /* =======================================================
+     CHARACTER ANIMATION REFERENCES
+  ======================================================= */
 
   root.userData.animation = {
-    leftArm: leftShoulder,
-    rightArm: rightShoulder,
-    leftLeg: leftHip,
-    rightLeg: rightHip,
+    leftArm,
+    rightArm,
+    leftLeg,
+    rightLeg,
     torso
   };
 
 
-  root.traverse(child => {
-    if (child.isMesh) {
-      child.userData.selectableRoot = false;
+  /* -------------------------------------------------------
+     Make all meshes children of the character root for
+     selection purposes.
+  ------------------------------------------------------- */
+
+  root.traverse(
+    child => {
+      if (child.isMesh) {
+        child.userData.selectableRoot =
+          false;
+      }
     }
-  });
+  );
 
 
   return root;
@@ -1187,61 +1606,94 @@ function createHumanCharacter(data = {}) {
    PRIMITIVES
 ========================================================= */
 
-function createPrimitive(type, data = {}) {
+function createPrimitive(
+  type,
+  data = {}
+) {
   let geometry;
 
+
   switch (type) {
+
     case "sphere":
-      geometry = new THREE.SphereGeometry(
-        data.size ?? 0.8,
-        32,
-        20
-      );
+
+      geometry =
+        new THREE.SphereGeometry(
+          data.size ?? 0.8,
+          32,
+          20
+        );
+
       break;
+
 
     case "cone":
-      geometry = new THREE.ConeGeometry(
-        data.size ?? 0.8,
-        data.height ?? 1.5,
-        32
-      );
+
+      geometry =
+        new THREE.ConeGeometry(
+          data.size ?? 0.8,
+          data.height ?? 1.5,
+          32
+        );
+
       break;
 
+
     case "torus":
-      geometry = new THREE.TorusGeometry(
-        data.size ?? 0.85,
-        data.tube ?? 0.22,
-        16,
-        48
-      );
+
+      geometry =
+        new THREE.TorusGeometry(
+          data.size ?? 0.85,
+          data.tube ?? 0.22,
+          16,
+          48
+        );
+
       break;
+
 
     case "cube":
     case "box":
+
     default:
-      geometry = new THREE.BoxGeometry(
-        data.width ?? 1.2,
-        data.height ?? 1.2,
-        data.depth ?? 1.2
-      );
+
+      geometry =
+        new THREE.BoxGeometry(
+          data.width ?? 1.2,
+          data.height ?? 1.2,
+          data.depth ?? 1.2
+        );
+
       break;
   }
 
 
-  const material = new THREE.MeshStandardMaterial({
-    color: data.color ?? randomColor(),
-    roughness: 0.5,
-    metalness: 0.15
-  });
+  const material =
+    new THREE.MeshStandardMaterial({
+      color:
+        data.color ??
+        randomColor(),
+
+      roughness: 0.5,
+
+      metalness: 0.15
+    });
 
 
-  const object = new THREE.Mesh(
-    geometry,
-    material
-  );
+  const object =
+    new THREE.Mesh(
+      geometry,
+      material
+    );
 
-  object.castShadow = true;
-  object.receiveShadow = true;
+
+  object.castShadow =
+    true;
+
+
+  object.receiveShadow =
+    true;
+
 
   object.position.set(
     data.x ?? 0,
@@ -1249,18 +1701,26 @@ function createPrimitive(type, data = {}) {
     data.z ?? 0
   );
 
+
   object.rotation.set(
     data.rotationX ?? 0,
     data.rotationY ?? 0,
     data.rotationZ ?? 0
   );
 
+
   object.name =
     data.name ||
     `${capitalize(type)} ${S.objects.length + 1}`;
 
-  object.userData.type = capitalize(type);
-  object.userData.selectableRoot = true;
+
+  object.userData.type =
+    capitalize(type);
+
+
+  object.userData.selectableRoot =
+    true;
+
 
   return object;
 }
@@ -1270,41 +1730,68 @@ function createPrimitive(type, data = {}) {
    CREATE OBJECT
 ========================================================= */
 
-function createObject(type, data = {}) {
+function createObject(
+  type,
+  data = {}
+) {
   if (!S.scene) {
-    showToast("3D Studio is still loading.");
+    showToast(
+      "3D Studio is still loading."
+    );
+
     return null;
   }
 
 
-  let object;
+  const normalized =
+    String(type || "cube")
+      .toLowerCase();
 
 
-  if (
-    type === "human" ||
-    type === "character" ||
-    type === "human character"
-  ) {
-    object = createHumanCharacter(data);
-  } else {
-    object = createPrimitive(type, data);
+  const object =
+    [
+      "human",
+      "character",
+      "human character"
+    ].includes(normalized)
+
+      ? createHumanCharacter(
+          data
+        )
+
+      : createPrimitive(
+          normalized,
+          data
+        );
+
+
+  if (!object) {
+    return null;
   }
 
 
-  if (!object) return null;
+  S.scene.add(
+    object
+  );
 
 
-  S.scene.add(object);
+  S.objects.push(
+    object
+  );
 
-  S.objects.push(object);
 
-  selectObject(object);
+  selectObject(
+    object
+  );
+
 
   updateObjectList();
+
 
   if (S.settings.autoSave) {
     saveCurrentProject(false);
   }
+
 
   return object;
 }
@@ -1314,81 +1801,140 @@ function createObject(type, data = {}) {
    SELECTION
 ========================================================= */
 
-function getSelectableRoot(object) {
-  let current = object;
+function getSelectableRoot(
+  object
+) {
+  let current =
+    object;
+
 
   while (current) {
-    if (current.userData?.selectableRoot) {
+
+    if (
+      current.userData?.selectableRoot
+    ) {
       return current;
     }
 
-    current = current.parent;
+
+    current =
+      current.parent;
   }
+
 
   return null;
 }
 
 
-function selectObject(object) {
-  S.selected = object;
+function selectObject(
+  object
+) {
+  S.selected =
+    object;
+
 
   updateObjectList();
+
   renderProperties();
 }
 
 
 /* =========================================================
-   STUDIO CLICK
+   SCENE SELECTION
 ========================================================= */
 
 function initializeSceneSelection() {
-  const container = $("scene-container");
+  const container =
+    $("scene-container");
 
-  if (!container) return;
-
-
-  container.addEventListener("pointerdown", event => {
-    if (!S.renderer || !S.camera) return;
-
-    const rect = S.renderer.domElement.getBoundingClientRect();
-
-    const mouse = new THREE.Vector2(
-      ((event.clientX - rect.left) / rect.width) * 2 - 1,
-      -((event.clientY - rect.top) / rect.height) * 2 + 1
-    );
+  if (!container) {
+    return;
+  }
 
 
-    const raycaster = new THREE.Raycaster();
+  container.addEventListener(
+    "pointerdown",
+    event => {
 
-    raycaster.setFromCamera(
-      mouse,
-      S.camera
-    );
-
-
-    const hits = raycaster.intersectObjects(
-      S.objects,
-      true
-    );
+      if (
+        !S.renderer ||
+        !S.camera
+      ) {
+        return;
+      }
 
 
-    if (!hits.length) {
-      S.selected = null;
-      updateObjectList();
-      renderProperties();
-      return;
+      const rect =
+        S.renderer.domElement.getBoundingClientRect();
+
+
+      const mouse =
+        new THREE.Vector2(
+
+          (
+            (
+              event.clientX -
+              rect.left
+            ) /
+            rect.width
+          ) * 2 - 1,
+
+
+          -(
+            (
+              (
+                event.clientY -
+                rect.top
+              ) /
+              rect.height
+            ) * 2 - 1
+          )
+        );
+
+
+      const raycaster =
+        new THREE.Raycaster();
+
+
+      raycaster.setFromCamera(
+        mouse,
+        S.camera
+      );
+
+
+      const hits =
+        raycaster.intersectObjects(
+          S.objects,
+          true
+        );
+
+
+      if (!hits.length) {
+
+        S.selected =
+          null;
+
+        updateObjectList();
+
+        renderProperties();
+
+        return;
+      }
+
+
+      const selected =
+        getSelectableRoot(
+          hits[0].object
+        );
+
+
+      if (selected) {
+        selectObject(
+          selected
+        );
+      }
     }
-
-
-    const selected = getSelectableRoot(
-      hits[0].object
-    );
-
-
-    if (selected) {
-      selectObject(selected);
-    }
-  });
+  );
 }
 
 
@@ -1397,17 +1943,28 @@ function initializeSceneSelection() {
 ========================================================= */
 
 function updateObjectList() {
-  const list = $("objectList");
-  const count = $("objectCount");
+  const list =
+    $("objectList");
 
-  if (!list) return;
+  const count =
+    $("objectCount");
+
+
+  if (!list) {
+    return;
+  }
+
 
   if (count) {
-    count.textContent = String(S.objects.length);
+    count.textContent =
+      String(
+        S.objects.length
+      );
   }
 
 
   if (!S.objects.length) {
+
     list.innerHTML = `
       <p class="muted">
         No objects in the scene.
@@ -1418,34 +1975,61 @@ function updateObjectList() {
   }
 
 
-  list.innerHTML = S.objects.map((object, index) => `
-    <div
-      class="object-item ${S.selected === object ? "selected" : ""}"
-      data-object-id="${object.uuid}"
-    >
-      <span class="object-index">
-        ${index + 1}
-      </span>
+  list.innerHTML =
+    S.objects
+      .map(
+        (object, index) => `
+          <div
+            class="object-item ${
+              S.selected === object
+                ? "selected"
+                : ""
+            }"
+            data-object-id="${object.uuid}"
+          >
 
-      <span class="object-name">
-        ${escapeHtml(object.name)}
-      </span>
-    </div>
-  `).join("");
+            <span class="object-index">
+              ${index + 1}
+            </span>
+
+            <span class="object-name">
+              ${escapeHtml(
+                object.name
+              )}
+            </span>
+
+          </div>
+        `
+      )
+      .join("");
 
 
-  list.querySelectorAll(".object-item").forEach(item => {
-    item.addEventListener("click", () => {
-      const object = S.objects.find(
-        candidate =>
-          candidate.uuid === item.dataset.objectId
+  list
+    .querySelectorAll(
+      ".object-item"
+    )
+    .forEach(item => {
+
+      item.addEventListener(
+        "click",
+        () => {
+
+          const object =
+            S.objects.find(
+              candidate =>
+                candidate.uuid ===
+                item.dataset.objectId
+            );
+
+
+          if (object) {
+            selectObject(
+              object
+            );
+          }
+        }
       );
-
-      if (object) {
-        selectObject(object);
-      }
     });
-  });
 }
 
 
@@ -1454,12 +2038,17 @@ function updateObjectList() {
 ========================================================= */
 
 function renderProperties() {
-  const panel = $("properties");
+  const panel =
+    $("properties");
 
-  if (!panel) return;
+
+  if (!panel) {
+    return;
+  }
 
 
   if (!S.selected) {
+
     panel.innerHTML = `
       <p class="muted">
         Select an object to edit its properties.
@@ -1470,26 +2059,38 @@ function renderProperties() {
   }
 
 
-  const object = S.selected;
+  const object =
+    S.selected;
+
 
   panel.innerHTML = `
+
     <div class="property">
+
       <label>Name</label>
 
       <input
         id="propName"
-        value="${escapeAttribute(object.name)}"
+        value="${escapeAttribute(
+          object.name
+        )}"
       />
+
     </div>
 
 
     <div class="property">
+
       <label>Type</label>
 
       <input
-        value="${escapeAttribute(object.userData.type || "Object")}"
+        value="${escapeAttribute(
+          object.userData.type ||
+          "Object"
+        )}"
         disabled
       />
+
     </div>
 
 
@@ -1503,21 +2104,27 @@ function renderProperties() {
           id="posX"
           type="number"
           step="0.1"
-          value="${object.position.x.toFixed(2)}"
+          value="${object.position.x.toFixed(
+            2
+          )}"
         />
 
         <input
           id="posY"
           type="number"
           step="0.1"
-          value="${object.position.y.toFixed(2)}"
+          value="${object.position.y.toFixed(
+            2
+          )}"
         />
 
         <input
           id="posZ"
           type="number"
           step="0.1"
-          value="${object.position.z.toFixed(2)}"
+          value="${object.position.z.toFixed(
+            2
+          )}"
         />
 
       </div>
@@ -1535,21 +2142,27 @@ function renderProperties() {
           id="rotX"
           type="number"
           step="0.1"
-          value="${object.rotation.x.toFixed(2)}"
+          value="${object.rotation.x.toFixed(
+            2
+          )}"
         />
 
         <input
           id="rotY"
           type="number"
           step="0.1"
-          value="${object.rotation.y.toFixed(2)}"
+          value="${object.rotation.y.toFixed(
+            2
+          )}"
         />
 
         <input
           id="rotZ"
           type="number"
           step="0.1"
-          value="${object.rotation.z.toFixed(2)}"
+          value="${object.rotation.z.toFixed(
+            2
+          )}"
         />
 
       </div>
@@ -1558,34 +2171,58 @@ function renderProperties() {
   `;
 
 
-  $("propName")?.addEventListener("input", event => {
-    object.name = event.target.value || "Object";
+  $("propName")?.addEventListener(
+    "input",
+    event => {
 
-    updateObjectList();
+      object.name =
+        event.target.value ||
+        "Object";
 
-    if (S.settings.autoSave) {
-      saveCurrentProject(false);
+
+      updateObjectList();
+
+
+      if (S.settings.autoSave) {
+        saveCurrentProject(false);
+      }
     }
-  });
+  );
 
 
   [
     ["posX", "x", "position"],
     ["posY", "y", "position"],
     ["posZ", "z", "position"],
+
     ["rotX", "x", "rotation"],
     ["rotY", "y", "rotation"],
     ["rotZ", "z", "rotation"]
-  ].forEach(([id, axis, property]) => {
-    $(id)?.addEventListener("input", event => {
-      object[property][axis] =
-        Number(event.target.value) || 0;
 
-      if (S.settings.autoSave) {
-        saveCurrentProject(false);
-      }
-    });
-  });
+  ].forEach(
+    ([id, axis, property]) => {
+
+      $(id)?.addEventListener(
+        "input",
+        event => {
+
+          object[property][axis] =
+            Number(
+              event.target.value
+            ) || 0;
+
+
+          if (
+            S.settings.autoSave
+          ) {
+            saveCurrentProject(
+              false
+            );
+          }
+        }
+      );
+    }
+  );
 }
 
 
@@ -1593,88 +2230,158 @@ function renderProperties() {
    REMOVE OBJECT
 ========================================================= */
 
-function removeObject(object) {
-  if (!object || !S.scene) return;
-
-  S.scene.remove(object);
-
-  disposeObject(object);
-
-  S.objects = S.objects.filter(
-    candidate => candidate !== object
-  );
-
-  if (S.selected === object) {
-    S.selected = null;
+function removeObject(
+  object
+) {
+  if (
+    !object ||
+    !S.scene
+  ) {
+    return;
   }
 
+
+  S.scene.remove(
+    object
+  );
+
+
+  disposeObject(
+    object
+  );
+
+
+  S.objects =
+    S.objects.filter(
+      candidate =>
+        candidate !== object
+    );
+
+
+  if (
+    S.selected === object
+  ) {
+    S.selected =
+      null;
+  }
+
+
   updateObjectList();
+
   renderProperties();
 
-  if (S.settings.autoSave) {
-    saveCurrentProject(false);
+
+  if (
+    S.settings.autoSave
+  ) {
+    saveCurrentProject(
+      false
+    );
   }
 }
 
 
 /* =========================================================
-   DUPLICATE
+   DUPLICATE OBJECT
 ========================================================= */
 
 function duplicateSelected() {
   if (!S.selected) {
-    showToast("Select an object first.");
+
+    showToast(
+      "Select an object first."
+    );
+
     return;
   }
 
 
-  const original = S.selected;
+  const original =
+    S.selected;
 
 
-  if (original.userData.character) {
-    const cloneData = serializeObject(original);
+  if (
+    original.userData.character
+  ) {
 
-    cloneData.name =
+    const data =
+      serializeObject(
+        original
+      );
+
+
+    data.name =
       `${original.name} Copy`;
 
-    cloneData.x =
-      original.position.x + 1.5;
 
-    createObject("human", cloneData);
+    data.x =
+      original.position.x +
+      1.5;
+
+
+    createObject(
+      "human",
+      data
+    );
+
 
     return;
   }
 
 
-  const clone = original.clone(true);
+  const clone =
+    original.clone(
+      true
+    );
+
 
   clone.name =
     `${original.name} Copy`;
 
-  clone.position.x += 1.5;
+
+  clone.position.x +=
+    1.5;
+
 
   clone.userData = {
     ...original.userData
   };
 
 
-  clone.traverse(child => {
-    if (child.isMesh) {
-      child.material =
-        child.material.clone();
+  clone.traverse(
+    child => {
+
+      if (
+        child.isMesh
+      ) {
+        child.material =
+          child.material.clone();
+      }
     }
-  });
+  );
 
 
-  S.scene.add(clone);
+  S.scene.add(
+    clone
+  );
 
-  S.objects.push(clone);
 
-  selectObject(clone);
+  S.objects.push(
+    clone
+  );
+
+
+  selectObject(
+    clone
+  );
+
 
   updateObjectList();
 
-  showToast("Object duplicated.");
+
+  showToast(
+    "Object duplicated."
+  );
 }
 
 
@@ -1683,53 +2390,96 @@ function duplicateSelected() {
 ========================================================= */
 
 function clearScene() {
-  if (!S.scene) return;
+  if (!S.scene) {
+    return;
+  }
 
-  [...S.objects].forEach(object => {
-    S.scene.remove(object);
-    disposeObject(object);
-  });
+
+  [...S.objects].forEach(
+    object => {
+
+      S.scene.remove(
+        object
+      );
+
+      disposeObject(
+        object
+      );
+    }
+  );
+
 
   S.objects = [];
+
   S.selected = null;
 
+
   updateObjectList();
+
   renderProperties();
 
-  showToast("Scene cleared.");
+
+  showToast(
+    "Scene cleared."
+  );
 }
 
 
 /* =========================================================
-   RESET
+   RESET SCENE
 ========================================================= */
 
 function resetScene() {
+  if (!S.camera) {
+    return;
+  }
+
+
   S.camera.position.set(
-    7,
-    5,
-    9
+    8,
+    4.5,
+    10
   );
+
 
   S.controls?.target.set(
     0,
-    0.5,
+    1.0,
     0
   );
 
+
   S.controls?.update();
 
-  S.objects.forEach(object => {
-    object.position.set(
-      0,
-      object.userData.character ? 0.68 : 0,
-      0
-    );
 
-    object.rotation.set(0, 0, 0);
-  });
+  S.objects.forEach(
+    object => {
 
-  showToast("Scene reset.");
+      object.position.set(
+        object.userData.character
+          ? 2.0
+          : -2.2,
+
+        object.userData.character
+          ? 1.4
+          : -0.9,
+
+        0
+      );
+
+
+      object.rotation.set(
+        0,
+        0,
+        0
+      );
+    }
+  );
+
+
+  showToast(
+    "Scene reset."
+  );
 }
 
 
@@ -1738,16 +2488,29 @@ function resetScene() {
 ========================================================= */
 
 function toggleWireframe() {
-  S.wire = !S.wire;
+  S.wire =
+    !S.wire;
 
-  S.objects.forEach(object => {
-    object.traverse(child => {
-      if (child.isMesh && child.material) {
-        child.material.wireframe =
-          S.wire;
-      }
-    });
-  });
+
+  S.objects.forEach(
+    object => {
+
+      object.traverse(
+        child => {
+
+          if (
+            child.isMesh &&
+            child.material
+          ) {
+
+            child.material.wireframe =
+              S.wire;
+          }
+        }
+      );
+    }
+  );
+
 
   showToast(
     S.wire
@@ -1761,8 +2524,12 @@ function toggleWireframe() {
    PLAY / PAUSE
 ========================================================= */
 
-function setPlaying(value) {
-  S.playing = value;
+function setPlaying(
+  value
+) {
+  S.playing =
+    value;
+
 
   showToast(
     value
@@ -1772,36 +2539,65 @@ function setPlaying(value) {
 }
 
 
-function animateCharacters(time) {
-  if (!S.playing) return;
+/* =========================================================
+   CHARACTER ANIMATION
+========================================================= */
 
-  const t = time * 0.004;
+function animateCharacters(
+  time
+) {
+  if (!S.playing) {
+    return;
+  }
 
-  S.objects.forEach(object => {
-    if (!object.userData.character) return;
 
-    const animation =
-      object.userData.animation;
+  const t =
+    time * 0.004;
 
-    if (!animation) return;
 
-    const walk = Math.sin(t * 2);
+  S.objects.forEach(
+    object => {
 
-    animation.leftArm.rotation.x =
-      walk * 0.45;
+      if (
+        !object.userData.character ||
+        !object.userData.animation
+      ) {
+        return;
+      }
 
-    animation.rightArm.rotation.x =
-      -walk * 0.45;
 
-    animation.leftLeg.rotation.x =
-      -walk * 0.32;
+      const animation =
+        object.userData.animation;
 
-    animation.rightLeg.rotation.x =
-      walk * 0.32;
 
-    animation.torso.rotation.z =
-      Math.sin(t * 2) * 0.025;
-  });
+      const walk =
+        Math.sin(
+          t * 2
+        );
+
+
+      animation.leftArm.rotation.x =
+        walk * 0.45;
+
+
+      animation.rightArm.rotation.x =
+        -walk * 0.45;
+
+
+      animation.leftLeg.rotation.x =
+        -walk * 0.32;
+
+
+      animation.rightLeg.rotation.x =
+        walk * 0.32;
+
+
+      animation.torso.rotation.z =
+        Math.sin(
+          t * 2
+        ) * 0.025;
+    }
+  );
 }
 
 
@@ -1809,14 +2605,28 @@ function animateCharacters(time) {
    RENDER LOOP
 ========================================================= */
 
-function animate(time = 0) {
-  requestAnimationFrame(animate);
+function animate(
+  time = 0
+) {
+  requestAnimationFrame(
+    animate
+  );
 
-  animateCharacters(time);
+
+  animateCharacters(
+    time
+  );
+
 
   S.controls?.update();
 
-  if (S.renderer && S.scene && S.camera) {
+
+  if (
+    S.renderer &&
+    S.scene &&
+    S.camera
+  ) {
+
     S.renderer.render(
       S.scene,
       S.camera
@@ -1830,7 +2640,9 @@ function animate(time = 0) {
 ========================================================= */
 
 function resizeRenderer() {
-  const container = $("scene-container");
+  const container =
+    $("scene-container");
+
 
   if (
     !container ||
@@ -1844,15 +2656,22 @@ function resizeRenderer() {
   const width =
     container.clientWidth;
 
+
   const height =
     container.clientHeight;
 
 
-  if (!width || !height) return;
+  if (
+    !width ||
+    !height
+  ) {
+    return;
+  }
 
 
   S.camera.aspect =
     width / height;
+
 
   S.camera.updateProjectionMatrix();
 
@@ -1866,32 +2685,43 @@ function resizeRenderer() {
 
 
 /* =========================================================
-   PROJECT SERIALIZATION
+   SERIALIZATION
 ========================================================= */
 
-function serializeObject(object) {
-  const data = {
-    name: object.name,
-    type: object.userData.character
-      ? "human"
-      : String(object.userData.type || "cube").toLowerCase(),
+function serializeObject(
+  object
+) {
+  return {
 
-    x: object.position.x,
-    y: object.position.y,
-    z: object.position.z,
+    name:
+      object.name,
 
-    rotationX: object.rotation.x,
-    rotationY: object.rotation.y,
-    rotationZ: object.rotation.z
+    type:
+      object.userData.character
+        ? "human"
+        : String(
+            object.userData.type ||
+              "cube"
+          ).toLowerCase(),
+
+    x:
+      object.position.x,
+
+    y:
+      object.position.y,
+
+    z:
+      object.position.z,
+
+    rotationX:
+      object.rotation.x,
+
+    rotationY:
+      object.rotation.y,
+
+    rotationZ:
+      object.rotation.z
   };
-
-
-  if (object.userData.character) {
-    data.type = "human";
-  }
-
-
-  return data;
 }
 
 
@@ -1906,19 +2736,29 @@ function serializeScene() {
    LOAD SCENE
 ========================================================= */
 
-function loadScene(objects = []) {
+function loadScene(
+  objects = []
+) {
   clearScene();
 
-  objects.forEach(data => {
-    createObject(
-      data.type,
-      data
-    );
-  });
 
-  S.selected = null;
+  objects.forEach(
+    data => {
+
+      createObject(
+        data.type,
+        data
+      );
+    }
+  );
+
+
+  S.selected =
+    null;
+
 
   updateObjectList();
+
   renderProperties();
 }
 
@@ -1927,11 +2767,18 @@ function loadScene(objects = []) {
    PROJECT MANAGEMENT
 ========================================================= */
 
-function createProject(name = "Untitled CGI Project") {
+function createProject(
+  name =
+    "Untitled CGI Project"
+) {
+
   const project = {
-    id: crypto.randomUUID
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random()}`,
+
+    id:
+      typeof crypto !== "undefined" &&
+      crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random()}`,
 
     name,
 
@@ -1947,71 +2794,96 @@ function createProject(name = "Untitled CGI Project") {
   };
 
 
-  S.projects.unshift(project);
+  S.projects.unshift(
+    project
+  );
+
 
   S.currentProjectId =
     project.id;
+
 
   writeStorage(
     STORAGE.projects,
     S.projects
   );
 
+
   writeStorage(
     STORAGE.currentProject,
     S.currentProjectId
   );
 
+
   renderProjects();
+
 
   showToast(
     `Project "${name}" created.`
   );
 
+
   return project;
 }
 
 
+/* =========================================================
+   CURRENT PROJECT
+========================================================= */
+
 function getCurrentProject() {
   return S.projects.find(
     project =>
-      project.id === S.currentProjectId
+      project.id ===
+      S.currentProjectId
   );
 }
 
 
-function saveCurrentProject(showMessage = true) {
+/* =========================================================
+   SAVE PROJECT
+========================================================= */
+
+function saveCurrentProject(
+  showMessage = true
+) {
   let project =
     getCurrentProject();
 
 
   if (!project) {
-    const inputName =
-      $("projectName")?.value.trim();
 
-    project = createProject(
-      inputName ||
-      "Untitled CGI Project"
-    );
+    project =
+      createProject(
+        $("projectName")
+          ?.value.trim() ||
+        "Untitled CGI Project"
+      );
   }
 
 
   project.objects =
     serializeScene();
 
+
   project.updatedAt =
     new Date().toISOString();
 
 
   if (S.renderer) {
+
     try {
+
       project.thumbnail =
         S.renderer.domElement.toDataURL(
           "image/jpeg",
           0.72
         );
+
     } catch {
-      project.thumbnail = null;
+
+      project.thumbnail =
+        null;
     }
   }
 
@@ -2020,6 +2892,7 @@ function saveCurrentProject(showMessage = true) {
     STORAGE.projects,
     S.projects
   );
+
 
   writeStorage(
     STORAGE.currentProject,
@@ -2031,6 +2904,7 @@ function saveCurrentProject(showMessage = true) {
 
 
   if (showMessage) {
+
     showToast(
       `Saved "${project.name}".`
     );
@@ -2038,20 +2912,34 @@ function saveCurrentProject(showMessage = true) {
 }
 
 
-function openProject(id) {
+/* =========================================================
+   OPEN PROJECT
+========================================================= */
+
+function openProject(
+  id
+) {
   const project =
     S.projects.find(
-      item => item.id === id
+      item =>
+        item.id === id
     );
 
-  if (!project) return;
+
+  if (!project) {
+    return;
+  }
 
 
   S.currentProjectId =
     project.id;
 
-  $("projectName").value =
-    project.name;
+
+  if ($("projectName")) {
+
+    $("projectName").value =
+      project.name;
+  }
 
 
   loadScene(
@@ -2065,7 +2953,9 @@ function openProject(id) {
   );
 
 
-  location.hash = "#studio";
+  location.hash =
+    "#studio";
+
 
   showToast(
     `Opened "${project.name}".`
@@ -2073,13 +2963,23 @@ function openProject(id) {
 }
 
 
-function renameProject(id) {
+/* =========================================================
+   RENAME PROJECT
+========================================================= */
+
+function renameProject(
+  id
+) {
   const project =
     S.projects.find(
-      item => item.id === id
+      item =>
+        item.id === id
     );
 
-  if (!project) return;
+
+  if (!project) {
+    return;
+  }
 
 
   const newName =
@@ -2089,11 +2989,16 @@ function renameProject(id) {
     );
 
 
-  if (!newName?.trim()) return;
+  if (
+    !newName?.trim()
+  ) {
+    return;
+  }
 
 
   project.name =
     newName.trim();
+
 
   project.updatedAt =
     new Date().toISOString();
@@ -2103,8 +3008,12 @@ function renameProject(id) {
     S.currentProjectId ===
     project.id
   ) {
-    $("projectName").value =
-      project.name;
+
+    if ($("projectName")) {
+
+      $("projectName").value =
+        project.name;
+    }
   }
 
 
@@ -2113,25 +3022,41 @@ function renameProject(id) {
     S.projects
   );
 
+
   renderProjects();
 
-  showToast("Project renamed.");
+
+  showToast(
+    "Project renamed."
+  );
 }
 
 
-function duplicateProject(id) {
+/* =========================================================
+   DUPLICATE PROJECT
+========================================================= */
+
+function duplicateProject(
+  id
+) {
   const original =
     S.projects.find(
-      item => item.id === id
+      item =>
+        item.id === id
     );
 
-  if (!original) return;
+
+  if (!original) {
+    return;
+  }
 
 
   const duplicate = {
+
     ...original,
 
     id:
+      typeof crypto !== "undefined" &&
       crypto.randomUUID
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.random()}`,
@@ -2148,7 +3073,7 @@ function duplicateProject(id) {
     objects:
       JSON.parse(
         JSON.stringify(
-          original.objects
+          original.objects || []
         )
       )
   };
@@ -2158,12 +3083,15 @@ function duplicateProject(id) {
     duplicate
   );
 
+
   writeStorage(
     STORAGE.projects,
     S.projects
   );
 
+
   renderProjects();
+
 
   showToast(
     "Project duplicated."
@@ -2171,37 +3099,56 @@ function duplicateProject(id) {
 }
 
 
-function deleteProject(id) {
+/* =========================================================
+   DELETE PROJECT
+========================================================= */
+
+function deleteProject(
+  id
+) {
   const project =
     S.projects.find(
-      item => item.id === id
+      item =>
+        item.id === id
     );
 
-  if (!project) return;
+
+  if (!project) {
+    return;
+  }
 
 
-  const confirmed =
-    confirm(
+  if (
+    !confirm(
       `Delete "${project.name}"?`
-    );
-
-  if (!confirmed) return;
+    )
+  ) {
+    return;
+  }
 
 
   S.projects =
     S.projects.filter(
-      item => item.id !== id
+      item =>
+        item.id !== id
     );
 
 
   if (
     S.currentProjectId === id
   ) {
-    S.currentProjectId = null;
+
+    S.currentProjectId =
+      null;
+
 
     clearScene();
 
-    $("projectName").value = "";
+
+    if ($("projectName")) {
+      $("projectName").value =
+        "";
+    }
   }
 
 
@@ -2210,14 +3157,19 @@ function deleteProject(id) {
     S.projects
   );
 
+
   writeStorage(
     STORAGE.currentProject,
     S.currentProjectId
   );
 
+
   renderProjects();
 
-  showToast("Project deleted.");
+
+  showToast(
+    "Project deleted."
+  );
 }
 
 
@@ -2229,18 +3181,29 @@ function renderProjects() {
   const grid =
     $("projectGrid");
 
-  if (!grid) return;
+
+  if (!grid) {
+    return;
+  }
 
 
   if (!S.projects.length) {
+
     grid.innerHTML = `
+
       <article class="card">
-        <h3>No projects yet</h3>
+
+        <h3>
+          No projects yet
+        </h3>
+
         <p>
           Create your first project and start building a scene
           in the 3D Studio.
         </p>
+
       </article>
+
     `;
 
     return;
@@ -2248,108 +3211,163 @@ function renderProjects() {
 
 
   grid.innerHTML =
-    S.projects.map(project => `
-      <article class="project-card">
+    S.projects
+      .map(
+        project => `
 
-        <div class="project-preview">
-          ${
-            project.thumbnail
-              ? `<img
-                   src="${project.thumbnail}"
-                   alt="${escapeAttribute(project.name)} preview"
-                 />`
-              : `<span class="muted">3D Scene</span>`
+          <article class="project-card">
+
+            <div class="project-preview">
+
+              ${
+                project.thumbnail
+
+                  ? `
+                    <img
+                      src="${project.thumbnail}"
+                      alt="${escapeAttribute(
+                        project.name
+                      )} preview"
+                    />
+                  `
+
+                  : `
+                    <span class="muted">
+                      3D Scene
+                    </span>
+                  `
+              }
+
+            </div>
+
+
+            <h3>
+              ${escapeHtml(
+                project.name
+              )}
+            </h3>
+
+
+            <p>
+              ${
+                project.objects?.length ||
+                0
+              }
+              object${
+                project.objects?.length ===
+                1
+                  ? ""
+                  : "s"
+              }
+            </p>
+
+
+            <p class="muted">
+
+              Updated
+
+              ${formatDate(
+                project.updatedAt
+              )}
+
+            </p>
+
+
+            <div class="project-actions">
+
+              <button
+                class="btn"
+                data-project-action="open"
+                data-project-id="${project.id}"
+              >
+                Open
+              </button>
+
+
+              <button
+                class="btn"
+                data-project-action="rename"
+                data-project-id="${project.id}"
+              >
+                Rename
+              </button>
+
+
+              <button
+                class="btn"
+                data-project-action="duplicate"
+                data-project-id="${project.id}"
+              >
+                Duplicate
+              </button>
+
+
+              <button
+                class="btn"
+                data-project-action="delete"
+                data-project-id="${project.id}"
+              >
+                Delete
+              </button>
+
+            </div>
+
+          </article>
+
+        `
+      )
+      .join("");
+
+
+  grid
+    .querySelectorAll(
+      "[data-project-action]"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          const action =
+            button.dataset
+              .projectAction;
+
+
+          const id =
+            button.dataset
+              .projectId;
+
+
+          if (
+            action === "open"
+          ) {
+            openProject(id);
           }
-        </div>
-
-        <h3>
-          ${escapeHtml(project.name)}
-        </h3>
-
-        <p>
-          ${project.objects?.length || 0}
-          object${project.objects?.length === 1 ? "" : "s"}
-        </p>
-
-        <p class="muted">
-          Updated
-          ${formatDate(project.updatedAt)}
-        </p>
-
-        <div class="project-actions">
-
-          <button
-            class="btn"
-            data-project-action="open"
-            data-project-id="${project.id}"
-          >
-            Open
-          </button>
-
-          <button
-            class="btn"
-            data-project-action="rename"
-            data-project-id="${project.id}"
-          >
-            Rename
-          </button>
-
-          <button
-            class="btn"
-            data-project-action="duplicate"
-            data-project-id="${project.id}"
-          >
-            Duplicate
-          </button>
-
-          <button
-            class="btn"
-            data-project-action="delete"
-            data-project-id="${project.id}"
-          >
-            Delete
-          </button>
-
-        </div>
-
-      </article>
-    `).join("");
 
 
-  grid.querySelectorAll(
-    "[data-project-action]"
-  ).forEach(button => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        const action =
-          button.dataset.projectAction;
-
-        const id =
-          button.dataset.projectId;
+          if (
+            action === "rename"
+          ) {
+            renameProject(id);
+          }
 
 
-        if (action === "open") {
-          openProject(id);
+          if (
+            action === "duplicate"
+          ) {
+            duplicateProject(id);
+          }
+
+
+          if (
+            action === "delete"
+          ) {
+            deleteProject(id);
+          }
         }
-
-        if (action === "rename") {
-          renameProject(id);
-        }
-
-        if (action === "duplicate") {
-          duplicateProject(id);
-        }
-
-        if (action === "delete") {
-          deleteProject(id);
-        }
-      }
-    );
-
-  });
+      );
+    });
 }
 
 
@@ -2357,36 +3375,47 @@ function renderProjects() {
    GALLERY
 ========================================================= */
 
-function renderGallery(filter = "all") {
+function renderGallery(
+  filter = "all"
+) {
   const grid =
     $("galleryGrid");
 
-  if (!grid) return;
 
-
-  let items =
-    S.gallery;
-
-
-  if (filter !== "all") {
-    items =
-      items.filter(
-        item =>
-          item.category === filter
-      );
+  if (!grid) {
+    return;
   }
 
 
+  const items =
+    filter === "all"
+
+      ? S.gallery
+
+      : S.gallery.filter(
+          item =>
+            item.category ===
+            filter
+        );
+
+
   if (!items.length) {
+
     grid.innerHTML = `
+
       <article class="card">
-        <h3>Your gallery is empty.</h3>
+
+        <h3>
+          Your gallery is empty.
+        </h3>
 
         <p>
           Export a scene from the Studio or save a project
           to begin building your showcase.
         </p>
+
       </article>
+
     `;
 
     return;
@@ -2394,47 +3423,66 @@ function renderGallery(filter = "all") {
 
 
   grid.innerHTML =
-    items.map(item => `
-      <article class="gallery-card">
+    items
+      .map(
+        item => `
 
-        ${
-          item.image
-            ? `
-              <img
-                src="${item.image}"
-                alt="${escapeAttribute(item.title)}"
-              />
-            `
-            : `
-              <div class="gallery-placeholder">
-                3D Artwork
-              </div>
-            `
-        }
+          <article class="gallery-card">
 
-        <div class="gallery-card-content">
+            ${
+              item.image
 
-          <h3>
-            ${escapeHtml(item.title)}
-          </h3>
+                ? `
+                  <img
+                    src="${item.image}"
+                    alt="${escapeAttribute(
+                      item.title
+                    )}"
+                  />
+                `
 
-          <p>
-            ${escapeHtml(item.description || "")}
-          </p>
+                : `
+                  <div class="gallery-placeholder">
+                    3D Artwork
+                  </div>
+                `
+            }
 
-        </div>
 
-      </article>
-    `).join("");
+            <div class="gallery-card-content">
+
+              <h3>
+                ${escapeHtml(
+                  item.title
+                )}
+              </h3>
+
+
+              <p>
+                ${escapeHtml(
+                  item.description ||
+                    ""
+                )}
+              </p>
+
+            </div>
+
+          </article>
+
+        `
+      )
+      .join("");
 }
 
 
 /* =========================================================
-   EXPORT
+   EXPORT PNG
 ========================================================= */
 
 function exportPNG() {
-  if (!S.renderer) return;
+  if (!S.renderer) {
+    return;
+  }
 
 
   S.renderer.render(
@@ -2444,20 +3492,26 @@ function exportPNG() {
 
 
   const link =
-    document.createElement("a");
+    document.createElement(
+      "a"
+    );
+
 
   link.download =
     `cgi-studio-${Date.now()}.png`;
+
 
   link.href =
     S.renderer.domElement.toDataURL(
       "image/png"
     );
 
+
   link.click();
 
 
   saveGalleryImage();
+
 
   showToast(
     "PNG exported and added to Gallery."
@@ -2465,22 +3519,22 @@ function exportPNG() {
 }
 
 
+/* =========================================================
+   SAVE GALLERY IMAGE
+========================================================= */
+
 function saveGalleryImage() {
-  if (!S.renderer) return;
+  if (!S.renderer) {
+    return;
+  }
 
 
   const project =
     getCurrentProject();
 
 
-  const image =
-    S.renderer.domElement.toDataURL(
-      "image/jpeg",
-      0.8
-    );
-
-
   S.gallery.unshift({
+
     id:
       `${Date.now()}-${Math.random()}`,
 
@@ -2493,12 +3547,18 @@ function saveGalleryImage() {
 
     category:
       project?.objects?.some(
-        object => object.type === "human"
+        object =>
+          object.type ===
+          "human"
       )
         ? "character"
         : "3d",
 
-    image,
+    image:
+      S.renderer.domElement.toDataURL(
+        "image/jpeg",
+        0.8
+      ),
 
     createdAt:
       new Date().toISOString()
@@ -2506,7 +3566,10 @@ function saveGalleryImage() {
 
 
   S.gallery =
-    S.gallery.slice(0, 40);
+    S.gallery.slice(
+      0,
+      40
+    );
 
 
   writeStorage(
@@ -2520,12 +3583,13 @@ function saveGalleryImage() {
 
 
 /* =========================================================
-   CREATE MENU
+   STUDIO CONTROLS
 ========================================================= */
 
 function initializeStudioControls() {
   const createButton =
     $("createObjectBtn");
+
 
   const objectMenu =
     $("objectMenu");
@@ -2537,6 +3601,7 @@ function initializeStudioControls() {
 
       event.stopPropagation();
 
+
       objectMenu?.classList.toggle(
         "open"
       );
@@ -2544,28 +3609,31 @@ function initializeStudioControls() {
   );
 
 
-  objectMenu?.querySelectorAll(
-    "[data-object-type]"
-  ).forEach(button => {
+  objectMenu
+    ?.querySelectorAll(
+      "[data-object-type]"
+    )
+    .forEach(button => {
 
-    button.addEventListener(
-      "click",
-      event => {
+      button.addEventListener(
+        "click",
+        event => {
 
-        event.stopPropagation();
+          event.stopPropagation();
 
-        const type =
-          button.dataset.objectType;
 
-        createObject(type);
+          createObject(
+            button.dataset
+              .objectType
+          );
 
-        objectMenu.classList.remove(
-          "open"
-        );
-      }
-    );
 
-  });
+          objectMenu.classList.remove(
+            "open"
+          );
+        }
+      );
+    });
 
 
   document.addEventListener(
@@ -2573,17 +3641,16 @@ function initializeStudioControls() {
     event => {
 
       if (
-        !objectMenu ||
-        !createButton
+        objectMenu &&
+        createButton &&
+        !objectMenu.contains(
+          event.target
+        ) &&
+        !createButton.contains(
+          event.target
+        )
       ) {
-        return;
-      }
 
-
-      if (
-        !objectMenu.contains(event.target) &&
-        !createButton.contains(event.target)
-      ) {
         objectMenu.classList.remove(
           "open"
         );
@@ -2594,13 +3661,15 @@ function initializeStudioControls() {
 
   $("playButton")?.addEventListener(
     "click",
-    () => setPlaying(true)
+    () =>
+      setPlaying(true)
   );
 
 
   $("pauseButton")?.addEventListener(
     "click",
-    () => setPlaying(false)
+    () =>
+      setPlaying(false)
   );
 
 
@@ -2625,9 +3694,9 @@ function initializeStudioControls() {
           "Clear the entire scene?"
         )
       ) {
+
         clearScene();
       }
-
     }
   );
 
@@ -2649,12 +3718,14 @@ function initializeStudioControls() {
     () => {
 
       if (!S.selected) {
+
         showToast(
           "Select an object first."
         );
 
         return;
       }
+
 
       removeObject(
         S.selected
@@ -2669,30 +3740,35 @@ function initializeStudioControls() {
 ========================================================= */
 
 function initializeProjectControls() {
+
   $("newProjectButton")?.addEventListener(
     "click",
     () => {
 
       const name =
-        $("projectName")?.value.trim();
+        $("projectName")
+          ?.value.trim();
+
 
       createProject(
         name ||
         "Untitled CGI Project"
       );
 
+
       clearScene();
 
-      location.hash = "#studio";
+
+      location.hash =
+        "#studio";
     }
   );
 
 
   $("saveProjectButton")?.addEventListener(
     "click",
-    () => {
-      saveCurrentProject(true);
-    }
+    () =>
+      saveCurrentProject(true)
   );
 }
 
@@ -2702,35 +3778,41 @@ function initializeProjectControls() {
 ========================================================= */
 
 function initializeGalleryControls() {
-  document.querySelectorAll(
-    "[data-gallery-filter]"
-  ).forEach(button => {
 
-    button.addEventListener(
-      "click",
-      () => {
+  document
+    .querySelectorAll(
+      "[data-gallery-filter]"
+    )
+    .forEach(button => {
 
-        document.querySelectorAll(
-          "[data-gallery-filter]"
-        ).forEach(item => {
-          item.classList.remove(
+      button.addEventListener(
+        "click",
+        () => {
+
+          document
+            .querySelectorAll(
+              "[data-gallery-filter]"
+            )
+            .forEach(item => {
+
+              item.classList.remove(
+                "active"
+              );
+            });
+
+
+          button.classList.add(
             "active"
           );
-        });
 
 
-        button.classList.add(
-          "active"
-        );
-
-
-        renderGallery(
-          button.dataset.galleryFilter
-        );
-      }
-    );
-
-  });
+          renderGallery(
+            button.dataset
+              .galleryFilter
+          );
+        }
+      );
+    });
 }
 
 
@@ -2739,8 +3821,10 @@ function initializeGalleryControls() {
 ========================================================= */
 
 function loadSettings() {
+
   S.settings = {
     ...S.settings,
+
     ...readStorage(
       STORAGE.settings,
       {}
@@ -2748,14 +3832,25 @@ function loadSettings() {
   };
 
 
-  $("reduceMotion").checked =
-    S.settings.reduceMotion;
+  if ($("reduceMotion")) {
 
-  $("showGrid").checked =
-    S.settings.showGrid;
+    $("reduceMotion").checked =
+      S.settings.reduceMotion;
+  }
 
-  $("autoSave").checked =
-    S.settings.autoSave;
+
+  if ($("showGrid")) {
+
+    $("showGrid").checked =
+      S.settings.showGrid;
+  }
+
+
+  if ($("autoSave")) {
+
+    $("autoSave").checked =
+      S.settings.autoSave;
+  }
 
 
   applySettings();
@@ -2763,6 +3858,7 @@ function loadSettings() {
 
 
 function saveSettings() {
+
   writeStorage(
     STORAGE.settings,
     S.settings
@@ -2771,6 +3867,7 @@ function saveSettings() {
 
 
 function applySettings() {
+
   document.documentElement.style.scrollBehavior =
     S.settings.reduceMotion
       ? "auto"
@@ -2778,6 +3875,7 @@ function applySettings() {
 
 
   if (S.grid) {
+
     S.grid.visible =
       S.settings.showGrid;
   }
@@ -2785,6 +3883,7 @@ function applySettings() {
 
 
 function initializeSettings() {
+
   $("reduceMotion")?.addEventListener(
     "change",
     event => {
@@ -2792,7 +3891,9 @@ function initializeSettings() {
       S.settings.reduceMotion =
         event.target.checked;
 
+
       saveSettings();
+
       applySettings();
     }
   );
@@ -2805,7 +3906,9 @@ function initializeSettings() {
       S.settings.showGrid =
         event.target.checked;
 
+
       saveSettings();
+
       applySettings();
     }
   );
@@ -2818,6 +3921,7 @@ function initializeSettings() {
       S.settings.autoSave =
         event.target.checked;
 
+
       saveSettings();
     }
   );
@@ -2827,40 +3931,40 @@ function initializeSettings() {
     "click",
     () => {
 
-      const confirmed =
-        confirm(
+      if (
+        !confirm(
           "Delete all CGI Studio local data?"
-        );
+        )
+      ) {
+        return;
+      }
 
-      if (!confirmed) return;
 
-
-      localStorage.removeItem(
-        STORAGE.projects
-      );
-
-      localStorage.removeItem(
-        STORAGE.settings
-      );
-
-      localStorage.removeItem(
-        STORAGE.gallery
-      );
-
-      localStorage.removeItem(
-        STORAGE.currentProject
+      Object.values(
+        STORAGE
+      ).forEach(
+        key =>
+          localStorage.removeItem(
+            key
+          )
       );
 
 
       S.projects = [];
+
       S.gallery = [];
-      S.currentProjectId = null;
+
+      S.currentProjectId =
+        null;
 
 
       clearScene();
 
+
       renderProjects();
+
       renderGallery();
+
 
       showToast(
         "Local CGI Studio data cleared."
@@ -2875,23 +3979,32 @@ function initializeSettings() {
 ========================================================= */
 
 function initializeContact() {
+
   $("contactForm")?.addEventListener(
     "submit",
     event => {
 
       event.preventDefault();
 
+
       const name =
-        $("contactName").value.trim();
+        $("contactName")
+          ?.value.trim();
+
 
       const email =
-        $("contactEmail").value.trim();
+        $("contactEmail")
+          ?.value.trim();
+
 
       const subject =
-        $("contactSubject").value.trim();
+        $("contactSubject")
+          ?.value.trim();
+
 
       const message =
-        $("contactMessage").value.trim();
+        $("contactMessage")
+          ?.value.trim();
 
 
       if (
@@ -2900,6 +4013,7 @@ function initializeContact() {
         !subject ||
         !message
       ) {
+
         showToast(
           "Please complete all fields."
         );
@@ -2908,20 +4022,13 @@ function initializeContact() {
       }
 
 
-      /*
-       * This is a frontend-only contact form.
-       * Connect it to your preferred backend/email service
-       * when deploying.
-       */
-
-      const mailto =
-        `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
+      window.location.href =
+        `mailto:?subject=${encodeURIComponent(
+          subject
+        )}&body=${encodeURIComponent(
           `Name: ${name}\nEmail: ${email}\n\n${message}`
         )}`;
 
-
-      window.location.href =
-        mailto;
 
       showToast(
         "Opening your email application."
@@ -2935,32 +4042,43 @@ function initializeContact() {
    AUTO SAVE
 ========================================================= */
 
-setInterval(() => {
+setInterval(
+  () => {
 
-  if (
-    S.settings.autoSave &&
-    S.currentProjectId &&
-    S.objects.length
-  ) {
-    saveCurrentProject(false);
-  }
+    if (
+      S.settings.autoSave &&
+      S.currentProjectId &&
+      S.objects.length
+    ) {
 
-}, 15000);
+      saveCurrentProject(
+        false
+      );
+    }
+
+  },
+  15000
+);
 
 
 /* =========================================================
    UTILITIES
 ========================================================= */
 
-function capitalize(value) {
-  return String(value)
-    .charAt(0)
-    .toUpperCase() +
-    String(value).slice(1);
+function capitalize(
+  value
+) {
+  return (
+    String(value)
+      .charAt(0)
+      .toUpperCase() +
+    String(value).slice(1)
+  );
 }
 
 
 function randomColor() {
+
   const colors = [
     0x22d3ee,
     0xa855f7,
@@ -2970,16 +4088,24 @@ function randomColor() {
     0x60a5fa
   ];
 
+
   return colors[
     Math.floor(
-      Math.random() * colors.length
+      Math.random() *
+      colors.length
     )
   ];
 }
 
 
-function formatDate(date) {
-  if (!date) return "Unknown";
+function formatDate(
+  date
+) {
+
+  if (!date) {
+    return "Unknown";
+  }
+
 
   return new Intl.DateTimeFormat(
     undefined,
@@ -2987,64 +4113,113 @@ function formatDate(date) {
       dateStyle: "medium",
       timeStyle: "short"
     }
-  ).format(new Date(date));
+  ).format(
+    new Date(date)
+  );
 }
 
 
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+function escapeHtml(
+  value
+) {
+  return String(
+    value ?? ""
+  )
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
 }
 
 
-function escapeAttribute(value) {
-  return escapeHtml(value);
+function escapeAttribute(
+  value
+) {
+  return escapeHtml(
+    value
+  );
 }
 
 
-function disposeObject(object) {
-  object.traverse(child => {
+/* =========================================================
+   DISPOSE
+========================================================= */
 
-    if (child.geometry) {
-      child.geometry.dispose();
+function disposeObject(
+  object
+) {
+
+  object.traverse(
+    child => {
+
+      if (child.geometry) {
+        child.geometry.dispose();
+      }
+
+
+      if (child.material) {
+
+        const materials =
+          Array.isArray(
+            child.material
+          )
+            ? child.material
+            : [child.material];
+
+
+        materials.forEach(
+          material => {
+
+            if (
+              material.map
+            ) {
+              material.map.dispose();
+            }
+
+
+            if (
+              material.normalMap
+            ) {
+              material.normalMap.dispose();
+            }
+
+
+            if (
+              material.roughnessMap
+            ) {
+              material.roughnessMap.dispose();
+            }
+
+
+            if (
+              material.metalnessMap
+            ) {
+              material.metalnessMap.dispose();
+            }
+
+
+            material.dispose();
+          }
+        );
+      }
     }
-
-
-    if (child.material) {
-
-      const materials =
-        Array.isArray(child.material)
-          ? child.material
-          : [child.material];
-
-
-      materials.forEach(material => {
-
-        if (material.map) {
-          material.map.dispose();
-        }
-
-        if (material.normalMap) {
-          material.normalMap.dispose();
-        }
-
-        if (material.roughnessMap) {
-          material.roughnessMap.dispose();
-        }
-
-        if (material.metalnessMap) {
-          material.metalnessMap.dispose();
-        }
-
-        material.dispose();
-      });
-    }
-
-  });
+  );
 }
 
 
@@ -3053,17 +4228,20 @@ function disposeObject(object) {
 ========================================================= */
 
 function loadApplicationData() {
+
   S.projects =
     readStorage(
       STORAGE.projects,
       []
     );
 
+
   S.gallery =
     readStorage(
       STORAGE.gallery,
       []
     );
+
 
   S.currentProjectId =
     readStorage(
@@ -3080,68 +4258,120 @@ function loadApplicationData() {
         S.currentProjectId
     )
   ) {
-    S.currentProjectId = null;
+
+    S.currentProjectId =
+      null;
   }
 }
 
 
 /* =========================================================
-   INITIALIZE
+   INITIALIZE APPLICATION
 ========================================================= */
 
 function initialize() {
+
   loadApplicationData();
+
 
   loadSettings();
 
+
   initializeNavigation();
 
+
   renderNotes();
+
+
   renderHistory();
+
+
   renderTutorials();
+
+
   renderFuture();
+
+
   renderRoadmap();
+
+
   renderProjects();
+
+
   renderGallery();
+
 
   $("noteSearch")?.addEventListener(
     "input",
     event => {
+
       renderNotes(
         event.target.value
       );
     }
   );
 
+
+  /* IMPORTANT:
+     This creates the 3D cube AND human. */
+
   initializeThree();
+
+
   initializeSceneSelection();
+
+
   initializeStudioControls();
+
+
   initializeProjectControls();
+
+
   initializeGalleryControls();
+
+
   initializeSettings();
+
+
   initializeContact();
+
 
   window.addEventListener(
     "resize",
     resizeRenderer
   );
 
+
   route();
 
-  if (S.currentProjectId) {
+
+  if (
+    S.currentProjectId
+  ) {
+
     const project =
       getCurrentProject();
 
-    if (project) {
+
+    if (
+      project &&
+      $("projectName")
+    ) {
+
       $("projectName").value =
         project.name;
     }
   }
+
 
   console.log(
     "CGI Studio initialized successfully."
   );
 }
 
+
+/* =========================================================
+   START APPLICATION
+========================================================= */
 
 initialize();
